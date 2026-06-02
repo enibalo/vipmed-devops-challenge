@@ -4,6 +4,16 @@ Create production-ready Docker images for each service.
 
 
 
+1\. \*\*API Gateway\*\* - Node.js/Express service that routes requests (port 3000)
+
+2\. \*\*User Service\*\* - Node.js service that manages user CRUD operations (port 3001)
+
+3\. \*\*Redis\*\* - Data store for user data (port 6379)
+
+
+
+
+
 ###### **Research**
 
 * an image is an immutable package that contains everything... filesystem, files e.t.c that a container ( process ) needs to run. it also optionally contains the command that starts your container ( CMD "node start")
@@ -64,8 +74,8 @@ Create production-ready Docker images for each service.
 * Create .dockerignore files to exclude unnecessary files ( done)
 * Keep final images under 200MB
 * Implement graceful shutdown handling (SIGTERM) ( DONE, use exec form of CMD and entrypoint https://oneuptime.com/blog/post/2026-01-25-docker-container-signal-handling/view )
-* Security best practices
+* Security best practices (only expose testing ports and env varialble in dev build - DONE)
 * Production-ready mindset in images ( DONE )
-* Understanding of cloud-native pattern
+* Understanding of cloud-native pattern (DONE)
 * Clean, well-documented code and configurations  ( DONE)
 
