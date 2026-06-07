@@ -40,3 +40,6 @@ secrets/
 *.tfstate
 *.tfstate.*
 .terraform.lock.hcl
+
+# notes 
+prompt.txt
