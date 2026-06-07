@@ -177,6 +177,37 @@ const start = async () => {
   return server;
 };
 
-start();
+const server = start();
+
+
+// Graceful shutdown handler
+function shutdown()  {
+  console.log("SIGINT/SIGTERM received, shutting down gracefully...");
+
+  // Stop accepting new connections
+  server.close(async () => {
+    console.log("api-gateway server closed");
+    // TODO: use await with connection.close() to close downstream services...
+    
+    // Close Redis connection
+    await redis.quit();
+    console.log('redis connection closed');
+
+    // gracefully end the server process 
+    process.exit(0)
+  });
+
+  // Force shutdown after 10 seconds if it cannot close gracefully
+  setTimeout(() => {
+    console.error('Could not close connections in time, forcefully shutting down');
+    process.exit(1);
+  }, 10000);
+};
+
+// handle SIGTERM signal 
+process.on("SIGTERM", ()=> shutdown());
+
+// handle SIGINT (Ctrl+C) signal
+process.on("SIGINT", () => shutdown());
 
 module.exports = { app };
