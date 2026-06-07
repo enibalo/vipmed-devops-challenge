@@ -98,7 +98,7 @@ app.use((err, req, res, next) => {
 // TODO: Implement graceful shutdown
 // The process should handle SIGTERM and SIGINT signals to:
 // 1. Stop accepting new connections -> 
-// 2. Finish processing in-flight requests
+// 2. Finish processing in-flight requests -> 
 // 3. Close connections to downstream services -> 
 // 4. Exit cleanly -> 
 
@@ -108,26 +108,29 @@ const server = app.listen(PORT, () => {
 
 
 // Graceful shutdown handler
-process.on("SIGTERM", async () => {
-  console.log("SIGTERM received, shutting down gracefully...");
+function shutdown()  {
+  console.log("SIGINT/SIGTERM received, shutting down gracefully...");
 
   // Stop accepting new connections
-  server.close(() => {
-    console.log("HTTP server closed");
+  server.close(async () => {
+    console.log("api-gateway server closed");
+    // use await with connection.close() to close downstream services...
+    
+    // gracefully end the server process 
+    process.exit(0)
   });
 
-  try {
-    // End the process 
-    console.log("Graceful shutdown completed");
-    // close connections to downstream services 
-    process.exit(0);
-  } catch (error) {
-    console.error("Error during shutdown:", error);
+  // Force shutdown after 10 seconds if it cannot close gracefully
+  setTimeout(() => {
+    console.error('Could not close connections in time, forcefully shutting down');
     process.exit(1);
-  }
-});
+  }, 10000);
+};
 
-// Also handle SIGINT (Ctrl+C)
-process.on("SIGINT", () => process.emit("SIGTERM"));
+// handle SIGTERM signal 
+process.on("SIGTERM", ()=> shutdown());
+
+// handle SIGINT (Ctrl+C) signal
+process.on("SIGINT", () => shutdown());
 
 module.exports = { app, server };
