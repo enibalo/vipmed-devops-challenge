@@ -1,47 +1,79 @@
-# syntax=docker/dockerfile:1.4
+# prod-dependency caching stage
+FROM node:22.16.0 AS prod-dependency-cache
 
-# if you're doing anything beyond your local machine, please pin this to a specific version at https://hub.docker.com/_/node/
-FROM node:24-alpine AS development
+// choose working directory within the docker container 
+WORKDIR /app
 
-# set our node environment, either development or production
-# defaults to production, compose overrides this to development on build and run
-ARG NODE_ENV=production
+// copy the package.json from the host machine 
+COPY package*.json ./
 
-WORKDIR /code
+// install all dependcies, omit dev dependencies from production 
+RUN npm ci --omit=dev
 
-# default to port 80 for node, and 9229 and 9230 (tests) for debug
-ARG PORT=80
-ENV PORT $PORT
-EXPOSE $PORT 9229 9230
+# dev-dependency caching stage
+FROM node:22.16.0 AS dev-dependency-cache
 
-COPY package.json /code/package.json
-COPY package-lock.json /code/package-lock.json
+// choose the working directory within the docker container
+WORKDIR /app
+
+// copy the package.json from the host machine 
+COPY package*.json ./
+
+// install all dependencies 
 RUN npm ci
 
-# copy in our source code last, as it changes the most
-COPY . /code
+# production runtime stage
+FROM node:22-alpine AS production
 
-# if you want to use npm start instead, then use `docker run --init in production`
-# so that signals are passed properly. Note the code in index.js is needed to catch Docker signals
-# using node here is still more graceful stopping then npm with --init afaik
-# I still can't come up with a good production way to run with npm and graceful shutdown
-CMD [ "node", "src/index.js" ]
+// choose the working directory 
+WORKDIR /app
 
-FROM development as dev-envs
-RUN <<EOF
-apt-get update
-apt-get install -y --no-install-recommends git
-EOF
+// set the node environment to production 
+ENV NODE_ENV=production
 
-RUN <<EOF
-useradd -s /bin/bash -m vscode
-groupadd docker
-usermod -aG docker vscode
-EOF
-# install Docker tools (cli, buildx, compose)
-COPY --from=gloursdocker/docker / /
+// create a non-roout user and group 
+RUN addgroup -S nodejs && adduser -S nodeuser -G nodejs
 
-# create a new user without any special priviliges 
-RUN useradd -ms /bin/bash myuser
-# drop Docker's priviliges  
-USER myuser
+// copy dependencies from the dependency
+COPY --from=prod-dependency-cache /app/node_modules ./node_modules
+
+// copy needed files from the host machine
+COPY package.json ./
+COPY src ./src
+
+// change ownerships of all files to the non-root user
+RUN chown -R nodeuser:nodejs /app
+
+//change user of the docker container to the non-root user 
+USER nodeuser
+
+//  expose port 3000 from the container
+EXPOSE 3000
+
+//start the server 
+CMD ["node", "src/server.js"]
+
+# development stage
+FROM node:22.16.0 AS development
+
+// set the working directory in the docker container
+WORKDIR /app
+
+// set the node environment 
+ENV NODE_ENV=development
+
+// install git 
+RUN apt-get update && apt-get install -y git 
+
+// add dependencies 
+COPY --from=dev-dependency-cache /app/node_modules ./node_modules
+
+// copy needed files from the local host 
+COPY package*.json ./
+COPY src ./src
+
+// expose port 3000 from the container
+EXPOSE 3000
+
+// start the server in dev mode
+CMD ["npm", "run", "dev"]
