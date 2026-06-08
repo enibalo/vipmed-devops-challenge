@@ -76,4 +76,4 @@ COPY src ./src
 EXPOSE 3001
 
 // start the server in dev mode
-CMD ["npm", "run", "dev"]
+CMD ["node", "--watch", "src/index.js"]
