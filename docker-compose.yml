@@ -1,8 +1,6 @@
 services:
   api-gateway:
     build:
-      args:
-        - NODE_ENV=development
       context: ./apps/api-gateway
       dockerfile: Dockerfile
     ports:
