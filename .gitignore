@@ -42,6 +42,6 @@ secrets/
 .terraform.lock.hcl
 
 # notes 
-prompt.txt
+prompt*.txt
 notes.md 
 explanatio
