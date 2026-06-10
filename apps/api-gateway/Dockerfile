@@ -65,15 +65,17 @@ ENV NODE_ENV=development
 // install git 
 RUN apt-get update && apt-get install -y git 
 
+// expose port 3000 from the container
+EXPOSE 3000
+
 // add dependencies 
 COPY --from=dev-dependency-cache /app/node_modules ./node_modules
 
 // copy needed files from the local host 
 COPY package*.json ./
+
 COPY src ./src
 
-// expose port 3000 from the container
-EXPOSE 3000
 
 // start the server in dev mode
 CMD ["node", "--watch" ,"src/index.js"]
