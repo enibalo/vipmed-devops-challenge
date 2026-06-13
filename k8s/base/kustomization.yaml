@@ -12,6 +12,13 @@ resources:
 - api-gateway-deployment.yaml 
 - redis-deployment.yaml
 
+generatorOptions:
+  # annotations to add to all generated resources
+  annotations:
+    a8r.io/owner: "@enibalo"
+    a8r.io/repository: "https://github.com/enibalo/vipmed-devops-challenge"
+
+# create configmaps based on the env files for the user service and api gatway containers  
 configMapGenerator:
 - name: api-gateway-env
   envs:
@@ -19,3 +26,10 @@ configMapGenerator:
 - name: user-service-env
   envs:
   - api-gateway.env
+
+# create a Secret resource based on the secrets.env file
+secretGenerator:
+- name: api-gateway-secrets
+  envs:
+  - secrets.env
+  type: Opaque
