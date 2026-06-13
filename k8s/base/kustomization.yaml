@@ -11,3 +11,11 @@ resources:
 - user-service-deployment.yaml 
 - api-gateway-deployment.yaml 
 - redis-deployment.yaml
+
+configMapGenerator:
+- name: api-gateway-env
+  envs:
+  - api-gateway.env
+- name: user-service-env
+  envs:
+  - api-gateway.env

@@ -20,3 +20,14 @@ images:
 resources:
 - ../../base
 
+# generate a configMap for environment variables 
+configMapGenerator:
+- name: api-gateway-env
+  behavior: merge
+  envs:
+  - api-gateway.env
+- name: user-service-env
+  behavior: merge
+  envs:
+  - user-service-env
+
