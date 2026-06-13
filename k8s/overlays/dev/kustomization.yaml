@@ -20,7 +20,7 @@ images:
 resources:
 - ../../base
 
-# generate a configMap for environment variables 
+# change env variables that need a different value for development
 configMapGenerator:
 - name: api-gateway-env
   behavior: merge
