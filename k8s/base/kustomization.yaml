@@ -1,0 +1,13 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# setting common annotations for the entire cluster
+commonAnnotations:
+  a8r.io/owner: "@enibalo"
+  a8r.io/repository: "https://github.com/enibalo/vipmed-devops-challenge"
+
+# defining all resource manifests to use to create the cluster
+resources:
+- user-service-deployment.yaml 
+- api-gateway-deployment.yaml 
+- redis-deployment.yaml

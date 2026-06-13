@@ -1,0 +1,22 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+#setting namepace
+namespace: dev
+
+#setting a name suffix to be appended to each resource name 
+nameSuffix: -dev
+
+# change images to their development versions  
+images:
+- name: user-service-prod
+  newName: user-service-dev
+  newTag: 1.0.0
+- name: api-gateway-prod
+  newName: api-gateway-dev
+  newTag: 1.0.0
+
+# set base directory as the resource
+resources:
+- ../../base
+
