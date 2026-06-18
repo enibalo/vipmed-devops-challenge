@@ -1,6 +1,7 @@
 # prod-dependency caching stage
 FROM node:22.16.0 AS prod-dependency-cache
 
+// Access environment variable from 
 // choose working directory within the docker container 
 WORKDIR /app
 
@@ -47,8 +48,8 @@ RUN chown -R nodeuser:nodejs /app
 //change user of the docker container to the non-root user 
 USER nodeuser
 
-//  expose port 3000 from the container
-EXPOSE 3000
+//  expose port used by the api-gateway from the container
+EXPOSE $PORT
 
 //start the server 
 CMD ["node", "src/server.js"]
@@ -65,8 +66,8 @@ ENV NODE_ENV=development
 // install git 
 RUN apt-get update && apt-get install -y git 
 
-// expose port 3000 from the container
-EXPOSE 3000
+// expose port used by the api-gateway from the container
+EXPOSE $PORT
 
 // add dependencies 
 COPY --from=dev-dependency-cache /app/node_modules ./node_modules

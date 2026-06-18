@@ -47,8 +47,8 @@ RUN chown -R nodeuser:nodejs /app
 //change user of the docker container to the non-root user 
 USER nodeuser
 
-//  expose port 3001 from the container
-EXPOSE 3001
+//  expose port used by the user-service from the container
+EXPOSE $PORT
 
 //start the server 
 CMD ["node", "src/server.js"]
@@ -59,8 +59,8 @@ FROM node:22.16.0 AS development
 // set the working directory in the docker container
 WORKDIR /app
 
-// expose port 3001 from the container
-EXPOSE 3001
+// expose port used by the user-service from the container
+EXPOSE $PORT
 
 // set the node environment 
 ENV NODE_ENV=development
