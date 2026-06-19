@@ -29,7 +29,7 @@ FROM node:22-alpine AS production
 WORKDIR /app
 
 // set the node environment to production 
-ENV NODE_ENV=production
+ENV NODE_ENV=$NODE_ENV
 
 // create a non-roout user and group 
 RUN addgroup -S nodejs && adduser -S nodeuser -G nodejs
@@ -63,7 +63,7 @@ WORKDIR /app
 EXPOSE $PORT
 
 // set the node environment 
-ENV NODE_ENV=development
+ENV NODE_ENV=$NODE_ENV
 
 // install git 
 RUN apt-get update && apt-get install -y git 
