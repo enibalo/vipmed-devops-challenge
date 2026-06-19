@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-service-deployment
+  labels:
+    app: user-service
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: user-service
+  template:
+    metadata:
+      labels:
+        app: user-service
+    spec:
+      containers:
+      - name: user-service
+        image:  user-service:1.0.0
+        ports:
+        - containerPort: 80
+        livenessProbe:
+          httpGet:
+            path: /healthy
+            port: 80
+          initialDelaySeconds: 15 # run 5 trials and take the avg + buffer to determine best delay 
+          failureThreshold: 1
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: liveness-port
+          failureThreshold: 1
+          periodSeconds: 10
