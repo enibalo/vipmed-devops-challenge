@@ -11,7 +11,7 @@ Draw or describe the architecture of your deployment.
 ### Docker Strategy 
 
 - Multi-stage build approach:
-- I decided to split up the image building process into two stages: dependency stage and build stage. Dependency installation stage would install all npm dependencies. The building stage would take care of anything else needed to build the image. It's a popular design pattern that ensures that Docker reuses cached dependency when only source code changes, making build times faster. 
+- I decided to split up the image building process into two stages: dependency stage and build stage. As it was requested no real need for it honestly. It makes it more readable/maintainable I guess. 
 
 - I decided to have a dependency and build stage for production and a different dependency and build stage development. Developers need extra toolding and development dependencies that are unnecessary in production and that would increase the attack surface of the production container. 
 
