@@ -1,5 +1,6 @@
 services:
   api-gateway:
+    container_name: api-gateway
     build:
       context: ./apps/api-gateway
       dockerfile: Dockerfile
@@ -20,6 +21,7 @@ services:
       start_period: 15s
 
   user-service:
+    container_name: user-service
     build:
       context: ./apps/user-service
       dockerfile: Dockerfile
