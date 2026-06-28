@@ -20,8 +20,6 @@ spec:
         envFrom:
         - configMapRef:
             name: api-gateway-env
-        - secretRef: 
-          name: api-gateway-secrets
         ports:
         - containerPort: 3000 
         resources:
