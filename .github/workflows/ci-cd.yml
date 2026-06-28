@@ -5,19 +5,19 @@ name: CI/CD Pipeline
 on: [push]
 jobs: 
   lint: 
-    runs-on: ubuntu-latest 
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v3 
-      - name: Add Dependencies 
-        run: npm ci 
       - name: Lint and Test API Gateway Service
         run: | 
           cd apps/api-gateway
+          npm ci 
           npm run lint
           npm run test 
       - name: Lint and Test User Service 
         run: | 
           cd ../user-service
+          npm ci 
           npm run lint 
           npm run test         
