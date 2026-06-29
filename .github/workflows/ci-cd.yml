@@ -4,7 +4,7 @@
 name: CI/CD Pipeline 
 on: [push]
 jobs: 
-  lint: 
+  lint-and-test: 
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout Repo
