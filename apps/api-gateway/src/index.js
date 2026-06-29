@@ -1,9 +1,17 @@
 const express = require('express');
 const axios = require('axios');
+const process = require("process");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const USER_SERVICE_URL = process.env.USER_SERVICE_URL || 'http://localhost:3001';
+
+
+const client = require('prom-client');
+const collectDefaultMetrics = client.collectDefaultMetrics;
+const register = new client.Registry();
+const prefix = 'api-gateway';
+collectDefaultMetrics({ prefix, register });
 
 // TODO: Implement structured JSON logging (e.g., winston, pino)
 // All logs should include: timestamp, level, message, and request context
@@ -34,8 +42,11 @@ app.get('/health/ready', async (req, res) => {
   }
 });
 
-// TODO: Add /metrics endpoint for Prometheus
-// Hint: Use prom-client library to expose default and custom metrics
+
+app.get('/metrics', (req, res) => {
+  res.set('Content-Type', register.contentType);
+  res.end(async () => await register.metrics());
+});
 
 // Proxy to User Service
 app.get('/api/users', async (req, res) => {
@@ -94,14 +105,7 @@ app.use((err, req, res, next) => {
   console.error('Unhandled error:', err.message);
   res.status(500).json({ error: 'Internal server error' });
 });
-
-// TODO: Implement graceful shutdown
-// The process should handle SIGTERM and SIGINT signals to:
-// 1. Stop accepting new connections -> 
-// 2. Finish processing in-flight requests -> 
-// 3. Close connections to downstream services -> 
-// 4. Exit cleanly -> 
-
+ 
 const server = app.listen(PORT, () => {
   console.log(`API Gateway started on port ${PORT}`);
 });
