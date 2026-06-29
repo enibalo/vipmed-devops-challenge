@@ -37,6 +37,13 @@ Draw or describe the architecture of your deployment.
 - I used the exec form of the CMD to ensure that the node process runs directly as the process's PID 1 and gets passed any SIGTERM and SIGINT signals 
 - I did not use npm to start the server's as npm would not forward signals to the node process, and would prevent us from runnning the graceful shutdown code. 
 
+// TODO: Implement graceful shutdown
+// The process should handle SIGTERM and SIGINT signals to:
+// 1. Stop accepting new connections -> 
+// 2. Finish processing in-flight requests -> 
+// 3. Close connections to downstream services -> 
+// 4. Exit cleanly ->
+
 - Documentation: 
 - I left comments in the Docker file to ensure that future team mates can modify it smoothly. 
 
