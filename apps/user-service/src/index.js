@@ -1,6 +1,7 @@
 const express = require('express');
 const Redis = require('ioredis');
 const { v4: uuidv4 } = require('uuid');
+const process = require("process");
 
 const app = express();
 const PORT = process.env.PORT || 3001;
