@@ -10,7 +10,8 @@ const USER_SERVICE_URL = process.env.USER_SERVICE_URL || 'http://localhost:3001'
 const client = require('prom-client');
 const collectDefaultMetrics = client.collectDefaultMetrics;
 const register = new client.Registry();
-const prefix = 'api-gateway';
+// MAYBE WINSTON IS THE NEW REGISTRY... 
+const prefix = 'api_gateway_';
 collectDefaultMetrics({ prefix, register });
 
 // TODO: Implement structured JSON logging (e.g., winston, pino)
@@ -18,8 +19,14 @@ collectDefaultMetrics({ prefix, register });
 
 app.use(express.json());
 
-// TODO: Add request logging middleware
-// Should log: method, path, status code, response time in ms
+
+// Middleware to record request durations
+app.use((req, res, next) => {
+    res.on('finish', () => {
+      // use WINSTON TO DO THIS.. 
+    });
+    next();
+});
 
 // Health check endpoints
 app.get('/health', (req, res) => {
