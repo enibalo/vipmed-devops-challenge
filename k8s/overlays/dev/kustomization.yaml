@@ -29,5 +29,5 @@ configMapGenerator:
 - name: user-service-env
   behavior: merge
   envs:
-  - user-service-env
+  - user-service.env
 

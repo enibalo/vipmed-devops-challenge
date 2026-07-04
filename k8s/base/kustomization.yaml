@@ -8,9 +8,9 @@ commonAnnotations:
 
 # defining all resource manifests to use to create the cluster
 resources:
-- user-service-deployment.yaml 
-- api-gateway-deployment.yaml 
-- redis-deployment.yaml
+- user-service.yaml 
+- api-gateway.yaml 
+- redis.yaml
 
 generatorOptions:
   # annotations to add to all generated resources
