@@ -33,3 +33,54 @@ secretGenerator:
   envs:
   - secrets.env
   type: Opaque
+
+
+replacements: 
+# create a replacement to update the ports for each deployment based on the environment variables 
+- source:
+    kind: ConfigMap
+    name: api-gateway-env
+    fieldPath: data.port
+  targets:
+  - select:
+      kind: Deployment
+      name: api-gateway
+    fieldPaths:
+      - spec.template.spec.containers.0.ports.0
+      - spec.template.spec.containers.0.livenessProbe.httpGet.port
+      - spec.template.spec.containers.0.readinessProbe.httpGet.port
+    options:
+        create: true
+  - select:
+      kind: Service
+      name: api-gateway-service
+    fieldPaths:
+    - spec.port.0
+    - spec.port.0.targetPort
+    options:
+      create: true
+- source:
+    kind: ConfigMap
+    name: user-service-env
+    fieldPath: data.port
+  targets:
+  - select:
+      kind: Deployment
+      name: user-service
+    fieldPaths:
+      - spec.template.spec.containers.0.ports.0
+      - spec.template.spec.containers.0.livenessProbe.httpGet.port
+      - spec.template.spec.containers.0.readinessProbe.httpGet.port
+    options:
+        create: true
+  - select:
+      kind: Service
+      name: user-service-service
+    fieldPaths:
+    - spec.port.0
+    - spec.port.0.targetPort
+    options:
+      create: true
+
+
+
