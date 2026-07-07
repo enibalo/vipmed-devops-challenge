@@ -33,6 +33,14 @@ spec:
         image: "redis:7-alpine"
         ports:
         - containerPort: 6379
+        # change this to correct values
+        resources:
+          requests:
+            cpu: "1"
+            memory: 1Gi
+          limits:
+            cpu: "1"
+            memory: 2Gi
         volumeMounts:
         - name: data
           mountPath: /data

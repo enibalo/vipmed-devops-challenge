@@ -28,11 +28,11 @@ spec:
         - containerPort: 3000 
         resources:
           requests:
-            cpu: 100m
-            memory: 124Mi
-          limits:
             cpu: 200m
-            memory: 200Mi
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
         livenessProbe:
           httpGet:
             path: /health/live

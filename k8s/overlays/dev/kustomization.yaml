@@ -31,3 +31,53 @@ configMapGenerator:
   envs:
   - user-service.env
 
+
+patches:
+# adjust resource limits and requests for each service's containers
+- patch: |- 
+    - op: replace
+      path: spec.template.spec.containers.0.resources.requests.cpu
+      value: "100m"
+    - op: replace
+      path: spec.template.spec.containers.0.resources.requests.memory
+      value: "124Mi"
+    - op: replace
+      path: spec.template.spec.containers.0.resources.limits.cpu
+      value: "200m"
+    - op: replace
+      path: spec.template.spec.containers.0.resources.limits.memory
+      value: "256Mi"
+  target: 
+    kind: Deployment 
+    name: api-gateway|user-service
+- patch: |- 
+    - op: replace
+      path: spec.template.spec.containers.0.resources.requests.cpu
+      value: "100m"
+    - op: replace
+      path: spec.template.spec.containers.0.resources.requests.memory
+      value:"128Mi"
+    - op: replace
+      path: spec.template.spec.containers.0.resources.limits.cpu
+      value: "250m"
+    - op: replace
+        path: spec.template.spec.containers.0.resources.limits.memory
+        value: "256Mi"
+  target: 
+    kind: StatefulSet 
+    name: redis-data
+
+replacements: 
+# scale down number of replicas for each service for a  development environment 
+- sourceValue: "1"
+  targets:
+  - select:
+      kind: Deployment
+      name: user-service|api-service
+    fieldPaths:
+      - spec.replicas
+  - select:
+      kind: StatefulSet
+      name: redis-data
+    fieldPaths:
+      - spec.replicas
