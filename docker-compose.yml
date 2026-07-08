@@ -6,6 +6,10 @@ services:
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
+    volumes: 
+      - ./package.json:/app/package.json:ro
+      - ./package-lock.json:/app/package-lock.json:ro
+      - ./src:/app/src:ro
     environment:
       - PORT=3000
       - USER_SERVICE_URL=http://user-service:3001
@@ -27,6 +31,10 @@ services:
       dockerfile: Dockerfile
     ports:
       - "3001:3001"
+    volumes: 
+      - ./package.json:/app/package.json:ro
+      - ./package-lock.json:/app/package-lock.json:ro
+      - ./src:/app/src:ro
     environment:
       - PORT=3001
       - REDIS_HOST=redis
@@ -46,7 +54,7 @@ services:
     image: redis:7-alpine
     volumes:
       - redis-data:/data
-      - ./redis.acl:/usr/local/etc/redis/users.acl:ro
+      - ./apps/redis/redis.acl:/usr/local/etc/redis/users.acl:ro
     command:
       - redis-server
       - --aclfile
