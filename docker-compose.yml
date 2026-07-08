@@ -46,6 +46,12 @@ services:
     image: redis:7-alpine
     volumes:
       - redis-data:/data
+      - ./redis.acl:/usr/local/etc/redis/users.acl:ro
+    command:
+      - redis-server
+      - --aclfile
+      - /usr/local/etc/redis/users.acl
+
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
