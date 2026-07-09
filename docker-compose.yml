@@ -7,9 +7,9 @@ services:
     ports:
       - "3000:3000"
     volumes: 
-      - ./package.json:/app/package.json:ro
-      - ./package-lock.json:/app/package-lock.json:ro
-      - ./src:/app/src:ro
+      - ./apps/api-gateway/package.json:/app/package.json:ro
+      - ./apps/api-gateway/package-lock.json:/app/package-lock.json:ro
+      - ./apps/api-gateway/src:/app/src:ro
     env_file:
       - ./k8s/base/env/api-gateway.env
     depends_on:
@@ -30,9 +30,9 @@ services:
     ports:
       - "3001:3001"
     volumes: 
-      - ./package.json:/app/package.json:ro
-      - ./package-lock.json:/app/package-lock.json:ro
-      - ./src:/app/src:ro
+      - ./apps/user-service/package.json:/app/package.json:ro
+      - ./apps/user-service/package-lock.json:/app/package-lock.json:ro
+      - ./apps/user-service/src:/app/src:ro
     env_file: 
       - ./k8s/base/env/user-service.env
       - ./k8s/base/env/secrets.env
