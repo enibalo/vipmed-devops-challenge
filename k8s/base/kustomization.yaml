@@ -22,16 +22,16 @@ generatorOptions:
 configMapGenerator:
 - name: api-gateway-env
   envs:
-  - api-gateway.env
+  - ./env/api-gateway.env
 - name: user-service-env
   envs:
-  - user-service.env
+  - ./env/user-service.env
 
 # create a Secret resource based on the secrets.env file
 secretGenerator:
 - name: user-service-secrets
   envs:
-  - secrets.env
+  - ./env/secrets.env
   type: Opaque
 
 

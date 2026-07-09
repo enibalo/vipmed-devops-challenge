@@ -10,10 +10,8 @@ services:
       - ./package.json:/app/package.json:ro
       - ./package-lock.json:/app/package-lock.json:ro
       - ./src:/app/src:ro
-    environment:
-      - PORT=3000
-      - USER_SERVICE_URL=http://user-service:3001
-      - LOG_LEVEL=debug
+    env_file:
+      - ./k8s/base/env/api-gateway.env
     depends_on:
       user-service:
         condition: service_healthy
@@ -35,11 +33,9 @@ services:
       - ./package.json:/app/package.json:ro
       - ./package-lock.json:/app/package-lock.json:ro
       - ./src:/app/src:ro
-    environment:
-      - PORT=3001
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - LOG_LEVEL=debug
+    env_file: 
+      - ./k8s/base/env/user-service.env
+      - ./k8s/base/env/secrets.env
     depends_on:
       redis:
         condition: service_healthy
