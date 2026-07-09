@@ -25,7 +25,7 @@ spec:
         - configMapRef:
             name: user-service-env
         - secretRef: 
-          name: user-service-secrets
+           name: user-service-secrets
         ports:
         - containerPort: 3001 
         resources:
