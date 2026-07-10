@@ -170,15 +170,16 @@ app.use((err, req, res, next) => {
 // TODO: Implement graceful shutdown
 // Handle SIGTERM/SIGINT: close server, disconnect Redis, exit cleanly
 
+var server = null; 
 const start = async () => {
   await initializeData();
-  const server = app.listen(PORT, () => {
+  server = app.listen(PORT, () => {
     console.log(`User Service started on port ${PORT}`);
   });
-  return server;
+
 };
 
-const server = start();
+start(server);
 
 
 // Graceful shutdown handler
