@@ -33,8 +33,11 @@ secretGenerator:
   envs:
   - ./env/secrets.env
   type: Opaque
-
-
+- name: redis-aclfile
+  files:
+  - ./env/aclfile
+  type: Opaque
+  
 replacements: 
 # create a replacement to update the ports for each deployment based on the environment variables 
 - source:
