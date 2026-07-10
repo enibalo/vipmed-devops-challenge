@@ -20,8 +20,8 @@ spec:
     matchLabels:
       app: redis 
   serviceName: "redis"
-  replicas: 3 # by default is 1
-  minReadySeconds: 10 # by default is 0
+  replicas: 3 
+  minReadySeconds: 10 
   template:
     metadata:
       labels:
@@ -45,6 +45,10 @@ spec:
           mountPath: /data
         - name: aclfile
           mountPath: /usr/local/etc/redis/users.acl
+      volumes:
+        - name: aclfile
+          secret:
+            secretName: redis-aclfile
   volumeClaimTemplates:
   - metadata:
       name: data
