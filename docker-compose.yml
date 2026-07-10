@@ -50,7 +50,7 @@ services:
     image: redis:7-alpine
     volumes:
       - redis-data:/data
-      - ./apps/redis/redis.acl:/usr/local/etc/redis/users.acl:ro
+      - ./k8s/base/env/aclfile:/usr/local/etc/redis/users.acl:ro
     command:
       - redis-server
       - --aclfile
