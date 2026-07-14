@@ -12,6 +12,8 @@ const PORT = process.env.PORT || 3001;
 // Redis connection
 const redis = new Redis({
   host: process.env.REDIS_HOST || 'localhost',
+  username: process.env.REDIS_USERNAME, 
+  password: process.env.REDIS_PASSWORD,
   port: parseInt(process.env.REDIS_PORT || '6379'),
   maxRetriesPerRequest: 3,
   lazyConnect: true
