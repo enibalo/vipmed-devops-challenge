@@ -43,7 +43,7 @@ replacements:
 - source:
     kind: ConfigMap
     name: api-gateway-env
-    fieldPath: data.port
+    fieldPath: data.PORT
   targets:
   - select:
       kind: Deployment
@@ -58,14 +58,14 @@ replacements:
       kind: Service
       name: api-gateway-service
     fieldPaths:
-    - spec.port.0
-    - spec.port.0.targetPort
+    - spec.ports.0.port
+    - spec.ports.0.targetPort
     options:
       create: true
 - source:
     kind: ConfigMap
     name: user-service-env
-    fieldPath: data.port
+    fieldPath: data.PORT
   targets:
   - select:
       kind: Deployment
@@ -80,8 +80,8 @@ replacements:
       kind: Service
       name: user-service-service
     fieldPaths:
-    - spec.port.0
-    - spec.port.0.targetPort
+    - spec.ports.0.port
+    - spec.ports.0.targetPort
     options:
       create: true
 
