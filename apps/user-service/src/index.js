@@ -6,7 +6,6 @@ const process = require("process");
 const app = express();
 const PORT = process.env.PORT || 3001;
 const TEST = process.env.TEST 
-console.log(TEST);
 
 // TODO: Implement structured JSON logging (e.g., winston, pino)
 // All logs should include: timestamp, level, message, and relevant context
@@ -218,7 +217,6 @@ const main = async () => {
 
 // Start the server if this program isn't being called for testing purposes 
 if (TEST != "true"){
-  console.log("main ran ")
   main();
 }
 
