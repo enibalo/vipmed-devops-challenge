@@ -9,15 +9,34 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v3 
-      - name: Lint and Test API Gateway Service
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v4
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Set up Docker Compose
+        uses: docker/setup-compose-action@v2
+
+      - name: Load Environment Fields 
         run: | 
-          cd apps/api-gateway
-          npm ci 
-          npm run lint
-          npm run test 
+          echo {{secrets.USER_SERVICE_SECRETS}} >> secrets.env 
+          mv secrets.env ./k8s/base/env/
+          echo {{vars.API_GATEWAY_ENV}} >> api-gateway.env 
+          mv api-gateway.env ./k8s/base/env/
+          echo {{vars.USER_SERVICE_ENV}} >> user-service.env
+          mv user-service.env ./k8s/base/env/
+    
+      - name: Lint and Test API Gateway Service
+        run: |  
+          docker compose build IMAGE
+          docker run npm run lint
+          docker run npm run test
+          
       - name: Lint and Test User Service 
         run: | 
-          cd apps/user-service
-          npm ci 
-          npm run lint 
-          npm run test         
+          docker compose build IMAGE
+          docker run npm run lint
+          docker run -e TEST=true af77a npm run tes  
+         
