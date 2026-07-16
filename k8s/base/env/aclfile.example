@@ -1,2 +1,2 @@
 user default off 
-user app on >admin123 ~app:* +@read +@write -@admin -@dangerous
+user app on >YOUR-PASSWORD ~* +@read +@write -@admin -@dangerous +INFO
