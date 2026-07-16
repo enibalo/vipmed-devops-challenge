@@ -5,6 +5,8 @@ const process = require("process");
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+const TEST = process.env.TEST 
+console.log(TEST);
 
 // TODO: Implement structured JSON logging (e.g., winston, pino)
 // All logs should include: timestamp, level, message, and relevant context
@@ -172,25 +174,13 @@ app.use((err, req, res, next) => {
 // TODO: Implement graceful shutdown
 // Handle SIGTERM/SIGINT: close server, disconnect Redis, exit cleanly
 
-var server = null; 
-const start = async () => {
-  await initializeData();
-  server = app.listen(PORT, () => {
-    console.log(`User Service started on port ${PORT}`);
-  });
-
-};
-
-start(server);
-
-
 // Graceful shutdown handler
-function shutdown()  {
+function shutdownServer(server)  {
   console.log("SIGINT/SIGTERM received, shutting down gracefully...");
 
   // Stop accepting new connections
   server.close(async () => {
-    console.log("api-gateway server closed");
+    console.log("user-service server closed");
     // TODO: use await with connection.close() to close downstream services...
     
     // Close Redis connection
@@ -208,10 +198,28 @@ function shutdown()  {
   }, 10000);
 };
 
-// handle SIGTERM signal 
-process.on("SIGTERM", ()=> shutdown());
+// Function that handles set up and clean up and runs the server 
+const main = async () => {
+  // Initialize data 
+  await initializeData();
 
-// handle SIGINT (Ctrl+C) signal
-process.on("SIGINT", () => shutdown());
+  //Start server 
+  var server = app.listen(PORT, () => {
+    console.log(`User Service started on port ${PORT}`);
+  });
 
-module.exports = { app };
+    // handle SIGTERM signal 
+  process.on("SIGTERM", ()=> shutdownServer(server));
+
+  // handle SIGINT (Ctrl+C) signal
+  process.on("SIGINT", () => shutdownServer(server));
+
+};
+
+// Start the server if this program isn't being called for testing purposes 
+if (TEST != "true"){
+  console.log("main ran ")
+  main();
+}
+
+module.exports = { app, main };
