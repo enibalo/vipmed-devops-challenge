@@ -8,22 +8,54 @@ const USER_SERVICE_URL = process.env.USER_SERVICE_URL || 'http://localhost:3001'
 
 
 const client = require('prom-client');
+
 const collectDefaultMetrics = client.collectDefaultMetrics;
 const register = new client.Registry();
-// MAYBE WINSTON IS THE NEW REGISTRY... 
 const prefix = 'api_gateway_';
 collectDefaultMetrics({ prefix, register });
 
-// TODO: Implement structured JSON logging (e.g., winston, pino)
-// All logs should include: timestamp, level, message, and request context
+const winston = require("winston");
+
+const logger = winston.createLogger({
+  transports: [
+    // configure winston to print to the console in JSON format in production and single-line format in dev 
+    new winston.transports.Console( {
+      format: process.env.NODE_ENV === "production"
+      ? winston.format.combine(
+          winston.format.timestamp(),
+          winston.format.errors({ stack: true }),
+          winston.format.json()
+        )
+      : winston.format.simple()})
+  ]
+});
+
 
 app.use(express.json());
 
 
+// Create a histogram metric for tracking request durations in miliseconds 
+const httpRequestDurationMiliseconds = new client.Histogram({
+    name: 'http_request_duration_ms',
+    help: 'Duration of HTTP requests in miliseconds',
+    labelNames: ['method', 'route', 'status_code'],
+    //configure buckets so they capture values in the miliseconds 1ms, 5ms e.t.c 
+    buckets: [0.001, 0.005, 0.010, 0.025, 0.050, 0.100, 0.250, 0.500, 1, 2, 5],
+    registers: [register],
+});
+
 // Middleware to record request durations
+// All logs should include: timestamp, level, message, and request context
 app.use((req, res, next) => {
-    res.on('finish', () => {
-      // use WINSTON TO DO THIS.. 
+      const end = httpRequestDurationMiliseconds.startTimer();
+      res.on('finish', () => {
+        end({ method: req.method, route: req.route ? req.route.path : req.path, status_code: res.statusCode });
+        logger.http("HTTP Request", {
+        requestId: req.id,
+        method: req.method,
+        url: req.originalUrl,
+        statusCode: res.statusCode,
+      });
     });
     next();
 });
@@ -61,7 +93,7 @@ app.get('/api/users', async (req, res) => {
     const response = await axios.get(`${USER_SERVICE_URL}/users`);
     res.json(response.data);
   } catch (error) {
-    console.error('Failed to fetch users:', error.message);
+    logger.error('Failed to fetch users:', error.message);
     res.status(502).json({ error: 'Failed to fetch users from user-service' });
   }
 });
@@ -74,7 +106,7 @@ app.get('/api/users/:id', async (req, res) => {
     if (error.response?.status === 404) {
       return res.status(404).json({ error: 'User not found' });
     }
-    console.error('Failed to fetch user:', error.message);
+    logger.error('Failed to fetch user:', error.message);
     res.status(502).json({ error: 'Failed to fetch user from user-service' });
   }
 });
@@ -84,7 +116,7 @@ app.post('/api/users', async (req, res) => {
     const response = await axios.post(`${USER_SERVICE_URL}/users`, req.body);
     res.status(201).json(response.data);
   } catch (error) {
-    console.error('Failed to create user:', error.message);
+    logger.error('Failed to create user:', error.message);
     res.status(502).json({ error: 'Failed to create user' });
   }
 });
@@ -97,7 +129,7 @@ app.delete('/api/users/:id', async (req, res) => {
     if (error.response?.status === 404) {
       return res.status(404).json({ error: 'User not found' });
     }
-    console.error('Failed to delete user:', error.message);
+    logger.error('Failed to delete user:', error.message);
     res.status(502).json({ error: 'Failed to delete user' });
   }
 });
@@ -109,22 +141,22 @@ app.use((req, res) => {
 
 // Error handler
 app.use((err, req, res, next) => {
-  console.error('Unhandled error:', err.message);
+  logger.error('Unhandled error:', err.message);
   res.status(500).json({ error: 'Internal server error' });
 });
  
 const server = app.listen(PORT, () => {
-  console.log(`API Gateway started on port ${PORT}`);
+  logger.info(`API Gateway started on port ${PORT}`);
 });
 
 
 // Graceful shutdown handler
 function shutdown()  {
-  console.log("SIGINT/SIGTERM received, shutting down gracefully...");
+  logger.info("SIGINT/SIGTERM received, shutting down gracefully...");
 
   // Stop accepting new connections
   server.close(async () => {
-    console.log("api-gateway server closed");
+    logger.info("api-gateway server closed");
     // use await with connection.close() to close downstream services...
     
     // gracefully end the server process 
@@ -133,7 +165,7 @@ function shutdown()  {
 
   // Force shutdown after 10 seconds if it cannot close gracefully
   setTimeout(() => {
-    console.error('Could not close connections in time, forcefully shutting down');
+    logger.error('Could not close connections in time, forcefully shutting down');
     process.exit(1);
   }, 10000);
 };
