@@ -4,6 +4,7 @@ services:
     build:
       context: ./apps/api-gateway
       dockerfile: Dockerfile
+    image: api-gateway
     ports:
       - "3002:3002"
     volumes: 
@@ -27,6 +28,7 @@ services:
     build:
       context: ./apps/user-service
       dockerfile: Dockerfile
+    image: user-service
     ports:
       - "3001:3001"
     volumes: 
