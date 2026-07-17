@@ -6,7 +6,7 @@ FROM node:22.16.0 AS prod-dependency-cache
 WORKDIR /app
 
 # copy the package.json from the host machine 
-COPY package*.json ./
+COPY package*.json ./s
 
 # install all dependcies, omit dev dependencies from production 
 RUN npm ci --omit=dev
@@ -74,6 +74,7 @@ COPY --from=dev-dependency-cache /app/node_modules ./node_modules
 
 # copy needed files from the local host 
 COPY package*.json ./
+COPY eslint.config.mjs ./
 
 COPY src ./src
 

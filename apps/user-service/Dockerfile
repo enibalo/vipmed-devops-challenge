@@ -73,6 +73,8 @@ COPY --from=dev-dependency-cache /app/node_modules ./node_modules
 
 # copy needed files from the local host 
 COPY package*.json ./
+COPY eslint.config.mjs ./
+
 COPY src ./src
 
 # start the server in dev mode
