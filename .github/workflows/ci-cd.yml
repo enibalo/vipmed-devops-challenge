@@ -30,13 +30,13 @@ jobs:
     
       - name: Lint and Test API Gateway Service
         run: |  
-          docker compose build IMAGE
-          docker run npm run lint
-          docker run npm run test
+          docker compose build api-gateway
+          docker run api-gateway npm run lint
+          docker run api-gateway npm run test
           
       - name: Lint and Test User Service 
         run: | 
-          docker compose build IMAGE
-          docker run npm run lint
-          docker run -e TEST=true af77a npm run tes  
+          docker compose build  user-service
+          docker run  user-service npm run lint
+          docker run -e TEST=true user-service npm run test  
          
