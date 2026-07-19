@@ -6,7 +6,7 @@ FROM node:22.16.0 AS prod-dependency-cache
 WORKDIR /app
 
 # copy the package.json from the host machine 
-COPY package*.json ./s
+COPY package*.json ./
 
 # install all dependcies, omit dev dependencies from production 
 RUN npm ci --omit=dev
