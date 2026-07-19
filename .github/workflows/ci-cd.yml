@@ -41,7 +41,7 @@ jobs:
     if: ${{ github.ref_name == 'main' || (github.ref_type == 'tag' && startsWith(github.ref_name, 'v')) }}
     runs-on: ubuntu-24.04
     steps: 
-      - name: Docker meta
+      - name: Create Image Tags 
         id: meta
         uses: docker/metadata-action@v6
           
@@ -54,7 +54,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
 
-      - name: Build and push
+      - name: Build and Push API-Gateway 
         uses: docker/build-push-action@v7
         with:
           context: "{{defaultContext}}:apps/api-gateway"
@@ -62,7 +62,7 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
 
-      - name: Build and push
+      - name: Build and Push User-Service
         uses: docker/build-push-action@v7
         with:
           context: "{{defaultContext}}:apps/user-service"
@@ -74,7 +74,7 @@ jobs:
     if: ${{ !( github.ref_name == 'main' || (github.ref_type == 'tag' && startsWith(github.ref_name, 'v')) ) }}
     runs-on: ubuntu-24.04
     steps: 
-      - name: Docker meta
+      - name: Create Image Tags 
         id: meta
         uses: docker/metadata-action@v6
           
@@ -87,7 +87,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
 
-      - name: Build and push
+      - name: Build and Push Api-Gateway 
         uses: docker/build-push-action@v7
         with:
           context: "{{defaultContext}}:apps/api-gateway"
@@ -95,7 +95,7 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
 
-      - name: Build and push
+      - name: Build and Push User-Service
         uses: docker/build-push-action@v7
         with:
           context: "{{defaultContext}}:apps/user-service"
