@@ -7,7 +7,7 @@ WORKDIR /app
 # copy the package.json from the host machine 
 COPY package*.json ./
 
-# install all dependcies, omit dev dependencies from production 
+# install all dependencies, omit dev dependencies from production 
 RUN npm ci --omit=dev
 
 # dev-dependency caching stage
@@ -28,26 +28,31 @@ FROM node:22-alpine AS production
 # choose the working directory 
 WORKDIR /app
 
-# set the node environment to production 
-ENV NODE_ENV=$NODE_ENV
+# set the default environment variables 
+ENV PORT=3001 \
+    REDIS_HOST=redis \
+    REDIS_PORT=6379 \
+    LOG_LEVEL=info \
+    NODE_ENV=production 
 
-# create a non-roout user and group 
-RUN addgroup -S nodejs && adduser -S nodeuser -G nodejs
+# copy dependencies from the dependency cache
+COPY --from=prod-dependency-cache /app/node_modules  ./node_modules 
 
-# copy dependencies from the dependency
-COPY --from=prod-dependency-cache /app/node_modules ./node_modules
+# add package files 
+COPY --from=prod-dependency-cache /app/package.json  ./
 
-# copy needed files from the host machine
-COPY package.json ./
+# copy source code
 COPY src ./src
 
-# change ownerships of all files to the non-root user
-RUN chown -R nodeuser:nodejs /app
+# create a non-roout user and group 
+RUN addgroup -S nodejs && adduser -S nodeuser -G nodejs \
+    # change ownerships of all files to the non-root user
+    chown -R nodeuser:nodejs /app
 
-#change user of the docker container to the non-root user 
+# change user of the docker container to the non-root user 
 USER nodeuser
 
-#  expose port used by the user-service from the container
+#  document port to be used by the user-service 
 EXPOSE $PORT
 
 #start the server 
@@ -59,11 +64,15 @@ FROM node:22.16.0 AS development
 # set the working directory in the docker container
 WORKDIR /app
 
-# expose port used by the user-service from the container
-EXPOSE $PORT
+# set the default environment variables 
+ENV PORT=3001 \
+    REDIS_HOST=redis \
+    REDIS_PORT=6379 \
+    LOG_LEVEL=info \
+    NODE_ENV=production 
 
-# set the node environment 
-ENV NODE_ENV=$NODE_ENV
+# document port that the user-service listens on
+EXPOSE $PORT
 
 # install git 
 RUN apt-get update && apt-get install -y git 
@@ -71,10 +80,13 @@ RUN apt-get update && apt-get install -y git
 # add dependencies 
 COPY --from=dev-dependency-cache /app/node_modules ./node_modules
 
-# copy needed files from the local host 
-COPY package*.json ./
+# add package files 
+COPY --from=dev-dependency-cache /app/package*.json  ./
+
+# copy config files from the host
 COPY eslint.config.mjs ./
 
+# copy source code
 COPY src ./src
 
 # start the server in dev mode
