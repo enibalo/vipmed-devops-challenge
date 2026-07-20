@@ -11,6 +11,7 @@ services:
       - ./apps/api-gateway/package.json:/app/package.json:ro
       - ./apps/api-gateway/package-lock.json:/app/package-lock.json:ro
       - ./apps/api-gateway/src:/app/src:ro
+    # NOTE: In order to run kubernetes locally, the env files need to be in this directory. 
     env_file:
       - ./k8s/base/env/api-gateway.env
     depends_on:
