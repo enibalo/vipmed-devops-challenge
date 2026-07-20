@@ -64,12 +64,14 @@ FROM node:22.16.0 AS development
 # set the working directory in the docker container
 WORKDIR /app
 
-# set the default environment variables 
+# set the default environment variables including secrets... DO NOT HARDCODE PERSONAL VALUES IN THIS FILE. Use docker-compose. Please also use proper secret management for the database password.
 ENV PORT=3001 \
     REDIS_HOST=redis \
     REDIS_PORT=6379 \
     LOG_LEVEL=info \
-    NODE_ENV=production 
+    NODE_ENV=production \
+    REDIS_PASSWORD=admin123 \
+    REDIS_USERNAME=app
 
 # document port that the user-service listens on
 EXPOSE $PORT
