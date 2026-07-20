@@ -10,25 +10,14 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v3 
 
-
       - name: Set up Docker Compose
         uses: docker/setup-compose-action@v2
 
-      - name: Load Environment Fields 
-        run: | 
-          echo {{secrets.USER_SERVICE_SECRETS}} >> secrets.env 
-          mv secrets.env ./k8s/base/env/
-          echo {{vars.API_GATEWAY_ENV}} >> api-gateway.env 
-          mv api-gateway.env ./k8s/base/env/
-          echo {{vars.USER_SERVICE_ENV}} >> user-service.env
-          mv user-service.env ./k8s/base/env/
-    
       - name: Lint and Test API Gateway Service
         run: |  
           docker compose build api-gateway
           docker run api-gateway npm run lint
           docker run api-gateway npm run test
-       
           
       - name: Lint and Test User Service 
         run: | 
@@ -50,15 +39,6 @@ jobs:
         with:
           username: ${{ vars.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
-
-      - name: Load Environment Fields 
-        run: | 
-          echo {{secrets.USER_SERVICE_SECRETS}} >> secrets.env 
-          mv secrets.env ./k8s/base/env/
-          echo {{vars.API_GATEWAY_ENV}} >> api-gateway.env 
-          mv api-gateway.env ./k8s/base/env/
-          echo {{vars.USER_SERVICE_ENV}} >> user-service.env
-          mv user-service.env ./k8s/base/env/
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
@@ -92,15 +72,6 @@ jobs:
         with:
           username: ${{ vars.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
-
-      - name: Load Environment Fields 
-        run: | 
-          echo {{secrets.USER_SERVICE_SECRETS}} >> secrets.env 
-          mv secrets.env ./k8s/base/env/
-          echo {{vars.API_GATEWAY_ENV}} >> api-gateway.env 
-          mv api-gateway.env ./k8s/base/env/
-          echo {{vars.USER_SERVICE_ENV}} >> user-service.env
-          mv user-service.env ./k8s/base/env/
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
