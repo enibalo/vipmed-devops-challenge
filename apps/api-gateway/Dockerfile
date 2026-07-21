@@ -1,5 +1,5 @@
 # prod-dependency caching stage
-FROM node:22.16.0 AS prod-dependency-cache
+FROM node:22-alpine AS prod-dependency-cache
 
 # choose working directory within the docker container 
 WORKDIR /app
@@ -11,7 +11,7 @@ COPY package*.json ./
 RUN npm ci --omit=dev
 
 # dev-dependency caching stage
-FROM node:22.16.0 AS dev-dependency-cache
+FROM node:22-alpine AS dev-dependency-cache
 
 # choose the working directory within the docker container
 WORKDIR /app
@@ -23,7 +23,7 @@ COPY package*.json ./
 RUN npm ci
 
 # production runtime stage
-FROM node:22-alpine AS production
+FROM gcr.io/distroless/nodejs22-debian12:nonroot AS production
 
 # choose the working directory 
 WORKDIR /app
@@ -34,28 +34,16 @@ ENV PORT=3000 \
     LOG_LEVEL=info \
     NODE_ENV=production
 
-# copy dependencies from the production cache - package.json copied to document the installed dependencies 
-COPY --from=prod-dependency-cache /app/node_modules ./
-
-# add package files 
-COPY --from=prod-dependency-cache /app/package*.json  ./
-
-# copy source code
+# copy cached and context files into file system
+COPY --from=prod-dependency-cache /app/node_modules ./node_modules
+COPY --from=prod-dependency-cache /app/package.json  ./
 COPY src ./src
 
-# create a non-root user and group 
-RUN addgroup -S nodejs && adduser -S nodeuser -G nodejs \ 
-# change ownerships of all files to the non-root user
-    chown -R nodeuser:nodejs /app
-
-# change user of the docker container to the non-root user 
-USER nodeuser
-
-#  document port that the api-gateway listens on
+# document port that the api-gateway listens on
 EXPOSE $PORT
 
 #start the server 
-CMD ["node", "src/server.js"]
+CMD [ "src/server.js"]
 
 
 # development stage
@@ -77,16 +65,10 @@ RUN apt-get update && apt-get install -y git
 # document port that the api-gateway listens on
 EXPOSE $PORT
 
-# add dependencies 
+# copy dependencies, config and source files into the file system 
 COPY --from=dev-dependency-cache /app/node_modules ./node_modules 
-
-# add package files 
 COPY --from=dev-dependency-cache /app/package*.json  ./
-
-# copy linter config files from host
 COPY eslint.config.mjs ./
-
-# copy source code 
 COPY src ./src
 
 # start the server in dev mode
