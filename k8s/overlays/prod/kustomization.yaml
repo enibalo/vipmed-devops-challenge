@@ -10,3 +10,4 @@ nameSuffix: -prod
 # set base directory as the resource
 resources:
 - ../../base
+- namespace.yaml

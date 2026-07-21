@@ -19,6 +19,8 @@ images:
 # set base directory as the resource
 resources:
 - ../../base
+- namespace.yaml
+
 
 # change env variables that need a different value for development
 configMapGenerator:
