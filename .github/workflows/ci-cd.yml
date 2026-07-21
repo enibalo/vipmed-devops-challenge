@@ -78,7 +78,7 @@ jobs:
       - name: Set up Docker Buildx          
         uses: docker/setup-buildx-action@v4
 
-      - name: Create Image Tags 
+      - name: Create API Gateway Image Tags 
         id: meta-api
         uses: docker/metadata-action@v6
         with: 
@@ -93,7 +93,7 @@ jobs:
           tags: ${{  steps.meta-api.outputs.tags }}
 
 
-      - name: Create Image Tags 
+      - name: Create User Service Image Tags 
         id: meta-user
         uses: docker/metadata-action@v6
         with: 
