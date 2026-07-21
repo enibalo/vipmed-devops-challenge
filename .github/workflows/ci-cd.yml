@@ -25,7 +25,9 @@ jobs:
           docker run  user-service npm run lint
           docker run -e TEST=true user-service npm run test  
 
-  prod-deploy: 
+  prod-deploy:
+    # configure job to run after a successful lint-and-test run
+    needs: lint-and-test  
   # Deploying a prod image only runs for the main branch and for push tag events when it matches the pattern: v*
     if: ${{ github.ref_name == 'main' || (github.ref_type == 'tag' && startsWith(github.ref_name, 'v')) }}
     runs-on: ubuntu-24.04
@@ -63,6 +65,8 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
   # Deploying a dev image only runs when the prod-deploy condition is not met 
   dev-deploy: 
+  # configure job to run after a successful lint-and-test run
+    needs: lint-and-test  
     if: ${{ !( github.ref_name == 'main' || (github.ref_type == 'tag' && startsWith(github.ref_name, 'v')) ) }}
     runs-on: ubuntu-24.04
     steps: 
