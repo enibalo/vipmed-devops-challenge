@@ -43,7 +43,7 @@ COPY src ./src
 EXPOSE $PORT
 
 #start the server 
-CMD [ "src/server.js"]
+CMD [ "src/index.js"]
 
 
 # development stage
