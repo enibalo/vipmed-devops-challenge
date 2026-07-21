@@ -49,7 +49,7 @@ replacements:
       kind: Deployment
       name: api-gateway
     fieldPaths:
-      - spec.template.spec.containers.0.ports.0
+      - spec.template.spec.containers.0.ports.0.containerPort
       - spec.template.spec.containers.0.livenessProbe.httpGet.port
       - spec.template.spec.containers.0.readinessProbe.httpGet.port
     options:
@@ -71,7 +71,7 @@ replacements:
       kind: Deployment
       name: user-service
     fieldPaths:
-      - spec.template.spec.containers.0.ports.0
+      - spec.template.spec.containers.0.ports.0.containerPort
       - spec.template.spec.containers.0.livenessProbe.httpGet.port
       - spec.template.spec.containers.0.readinessProbe.httpGet.port
     options:
