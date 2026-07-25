@@ -5,7 +5,7 @@ const process = require("process");
 const app = express();
 const PORT = process.env.PORT || 3000;
 const USER_SERVICE_URL = process.env.USER_SERVICE_URL || 'http://localhost:3001';
-
+const ENVIRONMENT = process.env.NODE_ENV || "production"
 
 const client = require('prom-client');
 
@@ -20,7 +20,7 @@ const logger = winston.createLogger({
   transports: [
     // configure winston to print to the console in JSON format in production and single-line format in dev 
     new winston.transports.Console( {
-      format: process.env.NODE_ENV === "production"
+      format: ENVIRONMENT === "production"
       ? winston.format.combine(
           winston.format.timestamp(),
           winston.format.errors({ stack: true }),
