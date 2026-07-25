@@ -4,7 +4,9 @@ services:
     build:
       context: ./apps/api-gateway
       dockerfile: Dockerfile
-    image: api-gateway
+      tags:
+        - "api-gateway:dev"
+    entrypoint: ["npm", "run", "dev"]
     ports:
       - "3002:3002"
     volumes: 
@@ -14,6 +16,7 @@ services:
     # NOTE: In order to run kubernetes locally, the env files need to be in this directory. 
     env_file:
       - ./k8s/base/env/api-gateway.env
+      - ./k8s/overlays/dev/api-gateway.env
     depends_on:
       user-service:
         condition: service_healthy
@@ -29,7 +32,9 @@ services:
     build:
       context: ./apps/user-service
       dockerfile: Dockerfile
-    image: user-service
+      tags:
+        - "user-service:dev"
+    entrypoint: ["npm", "run", "dev"]
     ports:
       - "3001:3001"
     volumes: 
@@ -39,6 +44,7 @@ services:
     env_file: 
       - ./k8s/base/env/user-service.env
       - ./k8s/base/env/secrets.env
+      - ./k8s/overlays/dev/user-service.env
     depends_on:
       redis:
         condition: service_healthy
