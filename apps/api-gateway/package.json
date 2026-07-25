@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
-    "dev": "node --watch src/index.js",
+    "dev": "nodemon src/index.js",
     "test": "node --test src/**/*.test.js",
     "lint": "npx eslint --fix "
   },
@@ -18,7 +18,8 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "eslint": "^10.6.0",
-    "globals": "^17.7.0"
+    "globals": "^17.7.0",
+    "nodemon": "^3.1.14"
   },
   "engines": {
     "node": ">=20.0.0"
