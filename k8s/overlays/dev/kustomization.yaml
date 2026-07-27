@@ -90,8 +90,5 @@ replacements:
       name: user-service|api-service
     fieldPaths:
       - spec.replicas
-  - select:
-      kind: StatefulSet
-      name: redis-data
-    fieldPaths:
-      - spec.replicas
+
+
