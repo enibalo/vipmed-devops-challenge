@@ -59,8 +59,10 @@ ENV PORT=3000 \
     NODE_ENV=production
 
 
-# install git 
-RUN apt-get update && apt-get install -y git 
+# install packages needed by developers 
+RUN apt-get update \ 
+    && apt-get install -y git \ 
+    && apt-get install -y nano 
 
 # document port that the api-gateway listens on
 EXPOSE $PORT
