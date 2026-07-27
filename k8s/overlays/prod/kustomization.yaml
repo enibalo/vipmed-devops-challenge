@@ -4,9 +4,6 @@ kind: Kustomization
 #setting namepace
 namespace: prod
 
-#setting a name suffix to be appended to each resource name
-nameSuffix: -prod
-
 # set base directory as the resource
 resources:
 - ../../base
