@@ -66,6 +66,21 @@ patches:
     kind: StatefulSet 
     name: redis-data
 
+# replace the production entrypoint command with the dev entrypoint command for each express service
+- patch: |-
+    - op: add
+      path: /spec/template/spec/containers/0/command
+      value:
+        - npm
+    - op: add
+      path: /spec/template/spec/containers/0/args
+      value:
+        - run
+        - dev
+  target: 
+    kind: Deployment 
+    name: api-gateway-app|user-service-app
+
 replacements: 
 # scale down number of replicas for each service for a  development environment 
 - sourceValue: "1"
