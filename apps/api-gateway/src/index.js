@@ -93,7 +93,7 @@ app.get('/api/users', async (req, res) => {
     const response = await axios.get(`${USER_SERVICE_URL}/users`);
     res.json(response.data);
   } catch (error) {
-    logger.error('Failed to fetch users:', error.message);
+    logger.error('Failed to fetch users: ' + error.message);
     res.status(502).json({ error: 'Failed to fetch users from user-service' });
   }
 });
@@ -106,7 +106,7 @@ app.get('/api/users/:id', async (req, res) => {
     if (error.response?.status === 404) {
       return res.status(404).json({ error: 'User not found' });
     }
-    logger.error('Failed to fetch user:', error.message);
+    logger.error('Failed to fetch user: ' + error.message);
     res.status(502).json({ error: 'Failed to fetch user from user-service' });
   }
 });
@@ -116,7 +116,7 @@ app.post('/api/users', async (req, res) => {
     const response = await axios.post(`${USER_SERVICE_URL}/users`, req.body);
     res.status(201).json(response.data);
   } catch (error) {
-    logger.error('Failed to create user:', error.message);
+    logger.error('Failed to create user: ' + error.message);
     res.status(502).json({ error: 'Failed to create user' });
   }
 });
@@ -129,7 +129,7 @@ app.delete('/api/users/:id', async (req, res) => {
     if (error.response?.status === 404) {
       return res.status(404).json({ error: 'User not found' });
     }
-    logger.error('Failed to delete user:', error.message);
+    logger.error('Failed to delete user: ' + error.message);
     res.status(502).json({ error: 'Failed to delete user' });
   }
 });
@@ -141,7 +141,7 @@ app.use((req, res) => {
 
 // Error handler
 app.use((err, req, res, next) => {
-  logger.error('Unhandled error:', err.message);
+  logger.error('Unhandled error: ' + err.message);
   res.status(500).json({ error: 'Internal server error' });
 });
  

@@ -52,7 +52,7 @@ const redis = new Redis({
 });
 
 redis.on('connect', () => logger.info('Connected to Redis'));
-redis.on('error', (err) => logger.error('Redis error:', err.message));
+redis.on('error', (err) => logger.error('Redis error: ' + err.message));
 
 app.use(express.json());
 
@@ -115,7 +115,7 @@ const initializeData = async () => {
       logger.info('Sample data initialized');
     }
   } catch (error) {
-    logger.warn('Could not initialize Redis data:', error.message);
+    logger.warn('Could not initialize Redis data: ' + error.message);
   }
 };
 
@@ -126,7 +126,7 @@ app.get('/users', async (req, res) => {
     const users = data ? JSON.parse(data) : [];
     res.json({ data: users, total: users.length });
   } catch (error) {
-    logger.error('Failed to get users:', error.message);
+    logger.error('Failed to get users: ' + error.message);
     res.status(500).json({ error: 'Failed to retrieve users' });
   }
 });
@@ -144,7 +144,7 @@ app.get('/users/:id', async (req, res) => {
 
     res.json(user);
   } catch (error) {
-    logger.error('Failed to get user:', error.message);
+    logger.error('Failed to get user: ' + error.message);
     res.status(500).json({ error: 'Failed to retrieve user' });
   }
 });
@@ -177,10 +177,10 @@ app.post('/users', async (req, res) => {
     users.push(newUser);
     await redis.set(USERS_KEY, JSON.stringify(users));
 
-    logger.info('User created:', newUser.id);
+    logger.info('User created: ' + newUser.id);
     res.status(201).json(newUser);
   } catch (error) {
-    logger.error('Failed to create user:', error.message);
+    logger.error('Failed to create user: ' + error.message);
     res.status(500).json({ error: 'Failed to create user' });
   }
 });
@@ -199,10 +199,10 @@ app.delete('/users/:id', async (req, res) => {
     users.splice(index, 1);
     await redis.set(USERS_KEY, JSON.stringify(users));
 
-    logger.info('User deleted:', req.params.id);
+    logger.info('User deleted: ' +  req.params.id);
     res.status(204).send();
   } catch (error) {
-    logger.error('Failed to delete user:', error.message);
+    logger.error('Failed to delete user: ' + error.message);
     res.status(500).json({ error: 'Failed to delete user' });
   }
 });
@@ -214,7 +214,7 @@ app.use((req, res) => {
 
 // Error handler
 app.use((err, req, res, next) => {
-  logger.error('Unhandled error:', err.message);
+  logger.error('Unhandled error: ' + err.message);
   res.status(500).json({ error: 'Internal server error' });
 });
 
