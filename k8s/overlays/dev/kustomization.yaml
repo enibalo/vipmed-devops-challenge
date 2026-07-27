@@ -6,12 +6,12 @@ namespace: dev
 
 # change images to their development versions  
 images:
-- name: user-service-prod
-  newName: user-service-dev
-  newTag: 1.0.0
-- name: api-gateway-prod
-  newName: api-gateway-dev
-  newTag: 1.0.0
+- name: enibalo/user-service:prod
+  newName: enibalo/user-service
+  newTag: dev
+- name: enibalo/api-gateway:prod
+  newName: enibalo/api-gateway
+  newTag: dev
 
 # set base directory as the resource
 resources:
