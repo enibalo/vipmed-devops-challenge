@@ -64,8 +64,10 @@ ENV PORT=3001 \
 # document port that the user-service listens on
 EXPOSE $PORT
 
-# install git 
-RUN apt-get update && apt-get install -y git 
+# install packages needed by developers 
+RUN apt-get update \ 
+    && apt-get install -y git \ 
+    && apt-get install -y nano 
 
 # add dependencies 
 COPY --from=dev-dependency-cache /app/node_modules ./node_modules
