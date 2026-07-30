@@ -22,4 +22,5 @@ prompt*.txt
 notes*.md 
 explanatio
 
-aclfile
+#database access control file 
+users.acl
