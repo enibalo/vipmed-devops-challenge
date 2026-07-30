@@ -86,6 +86,7 @@ app.get('/health/ready', async (req, res) => {
     await redis.ping();
     res.json({ status: 'ready', dependencies: { redis: 'up' } });
   } catch (error) {
+    logger.error('Failed to connect to redis: ' + error.message);
     res.status(503).json({
       status: 'not ready',
       dependencies: { redis: 'down' }

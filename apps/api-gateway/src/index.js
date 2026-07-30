@@ -74,6 +74,7 @@ app.get('/health/ready', async (req, res) => {
     await axios.get(`${USER_SERVICE_URL}/health`, { timeout: 2000 });
     res.json({ status: 'ready', dependencies: { userService: 'up' } });
   } catch (error) {
+    logger.error('Failed to connect to user-service: ' + error.message);
     res.status(503).json({
       status: 'not ready',
       dependencies: { userService: 'down' }
