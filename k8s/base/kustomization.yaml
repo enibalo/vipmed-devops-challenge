@@ -46,8 +46,8 @@ replacements:
     fieldPath: data.PORT
   targets:
   - select:
-      kind: Deployment
-      name: api-gateway
+      kind: Deployment 
+      name: api-gateway-app
     fieldPaths:
       - spec.template.spec.containers.0.ports.0.containerPort
       - spec.template.spec.containers.0.livenessProbe.httpGet.port
@@ -56,7 +56,7 @@ replacements:
         create: true
   - select:
       kind: Service
-      name: api-gateway-service
+      name: api-gateway
     fieldPaths:
     - spec.ports.0.port
     - spec.ports.0.targetPort
@@ -69,7 +69,7 @@ replacements:
   targets:
   - select:
       kind: Deployment
-      name: user-service
+      name: user-service-app
     fieldPaths:
       - spec.template.spec.containers.0.ports.0.containerPort
       - spec.template.spec.containers.0.livenessProbe.httpGet.port
@@ -78,7 +78,7 @@ replacements:
         create: true
   - select:
       kind: Service
-      name: user-service-service
+      name: user-service
     fieldPaths:
     - spec.ports.0.port
     - spec.ports.0.targetPort

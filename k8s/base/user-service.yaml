@@ -1,9 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: user-service
+  name: user-service-app
   labels:
-    app: user-service
+    app: user-service-app
 spec:
   replicas: 3
   strategy:
@@ -12,15 +12,15 @@ spec:
       maxUnavailable: 0
   selector:
     matchLabels:
-      app: user-service
+      app: user-service-app
   template:
     metadata:
       labels:
-        app: user-service
+        app: user-service-app
     spec:
       containers:
-      - name: user-service
-        image:  "@enibalo/user-service:1.0.0"
+      - name: user-service-app
+        image:  "enibalo/user-service:prod"
         envFrom:
         - configMapRef:
             name: user-service-env
@@ -52,14 +52,15 @@ spec:
           failureThreshold: 2
           successThreshold: 1
           timeoutSeconds: 3
+          
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: user-service-service
+  name: user-service
 spec:
   selector:
-    app: user-service
+    app: user-service-app
   ports:
     - port: 3001
       targetPort: 3001

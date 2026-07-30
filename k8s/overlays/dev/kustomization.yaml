@@ -1,7 +1,7 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-#setting namepace
+# creating namepace
 namespace: dev
 
 # change images to their development versions  
@@ -13,7 +13,7 @@ images:
   newName: enibalo/api-gateway
   newTag: dev
 
-# set base directory as the resource
+# set resources 
 resources:
 - ../../base
 - namespace.yaml
@@ -48,7 +48,7 @@ patches:
       value: "256Mi"
   target: 
     kind: Deployment 
-    name: api-gateway|user-service
+    name: api-gateway-app|user-service-app
 - patch: |- 
     - op: replace
       path: /spec/template/spec/containers/0/resources/requests/cpu
@@ -87,7 +87,7 @@ replacements:
   targets:
   - select:
       kind: Deployment
-      name: user-service|api-service
+      name: user-service-app|api-gateway-app
     fieldPaths:
       - spec.replicas
 

@@ -1,9 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: api-gateway
+  name: api-gateway-app
   labels:
-    app: api-gateway
+    app: api-gateway-app
 spec:
   replicas: 3
   strategy:
@@ -12,15 +12,15 @@ spec:
       maxUnavailable: 0
   selector:
     matchLabels:
-      app: api-gateway
+      app: api-gateway-app
   template:
     metadata:
       labels:
-        app: api-gateway
+        app: api-gateway-app
     spec:
       containers:
-      - name: api-gateway
-        image:  "@enibalo/api-gateway:1.0.0"
+      - name: api-gateway-app
+        image:  "enibalo/api-gateway:prod"
         envFrom:
         - configMapRef:
             name: api-gateway-env
@@ -54,11 +54,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: api-gateway-service
-  
+  name: api-gateway
 spec:
   selector:
-    app: api-gateway
+    app: api-gateway-app
   ports:
     - port: 3000
       targetPort: 3000
