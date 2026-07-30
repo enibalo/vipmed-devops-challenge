@@ -35,7 +35,7 @@ secretGenerator:
   type: Opaque
 - name: redis-aclfile
   files:
-  - ./env/aclfile
+  - ./env/users.acl
   type: Opaque
   
 replacements: 

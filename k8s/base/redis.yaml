@@ -33,6 +33,7 @@ spec:
       containers:
       - name: redis
         image: "redis:7-alpine"
+        command: ["redis-server", "--aclfile", "/usr/local/etc/redis/users.acl"]
         ports:
         - containerPort: 6379  
         resources:
@@ -46,7 +47,7 @@ spec:
         - name: data
           mountPath: /data
         - name: aclfile
-          mountPath: /usr/local/etc/redis/users.acl
+          mountPath: /usr/local/etc/redis
       volumes:
         - name: aclfile
           secret:
