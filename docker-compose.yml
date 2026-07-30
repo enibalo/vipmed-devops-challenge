@@ -62,7 +62,7 @@ services:
       - "6379:6379"
     volumes:
       - redis-data:/data
-      - ./k8s/base/env/aclfile:/usr/local/etc/redis/users.acl:ro
+      - ./k8s/base/env/users.acl:/usr/local/etc/redis/users.acl:ro
     command:
       - redis-server
       - --aclfile
