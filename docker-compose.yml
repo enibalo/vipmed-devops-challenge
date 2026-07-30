@@ -5,7 +5,7 @@ services:
       context: ./apps/api-gateway
       dockerfile: Dockerfile
       tags:
-        - "api-gateway:dev"
+        - "enibalo/api-gateway:dev"
     entrypoint: ["npm", "run", "dev"]
     ports:
       - "3002:3002"
@@ -33,7 +33,7 @@ services:
       context: ./apps/user-service
       dockerfile: Dockerfile
       tags:
-        - "user-service:dev"
+        - "enibalo/user-service:dev"
     entrypoint: ["npm", "run", "dev"]
     ports:
       - "3001:3001"
