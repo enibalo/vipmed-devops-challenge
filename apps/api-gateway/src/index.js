@@ -1,3 +1,7 @@
+/**
+ * API Gateway service that forwards user-related requests to the user service.
+ * Includes health, readiness, and proxy endpoints for user CRUD operations.
+ */
 const express = require('express');
 const axios = require('axios');
 
@@ -5,15 +9,12 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const USER_SERVICE_URL = process.env.USER_SERVICE_URL || 'http://localhost:3001';
 
-// TODO: Implement structured JSON logging (e.g., winston, pino)
-// All logs should include: timestamp, level, message, and request context
 
 app.use(express.json());
 
-// TODO: Add request logging middleware
-// Should log: method, path, status code, response time in ms
 
-// Health check endpoints
+
+// Health check endpoints for liveness and readiness probes.
 app.get('/health', (req, res) => {
   res.json({ status: 'healthy', service: 'api-gateway', timestamp: new Date().toISOString() });
 });
@@ -22,6 +23,7 @@ app.get('/health/live', (req, res) => {
   res.json({ status: 'alive' });
 });
 
+// Ready endpoint verifies the user-service dependency.
 app.get('/health/ready', async (req, res) => {
   try {
     await axios.get(`${USER_SERVICE_URL}/health`, { timeout: 2000 });
@@ -34,10 +36,10 @@ app.get('/health/ready', async (req, res) => {
   }
 });
 
-// TODO: Add /metrics endpoint for Prometheus
-// Hint: Use prom-client library to expose default and custom metrics
 
-// Proxy to User Service
+
+
+// Proxy to User Service: list users.
 app.get('/api/users', async (req, res) => {
   try {
     const response = await axios.get(`${USER_SERVICE_URL}/users`);
@@ -48,6 +50,7 @@ app.get('/api/users', async (req, res) => {
   }
 });
 
+// Proxy to User Service: get user by ID.
 app.get('/api/users/:id', async (req, res) => {
   try {
     const response = await axios.get(`${USER_SERVICE_URL}/users/${req.params.id}`);
@@ -61,6 +64,7 @@ app.get('/api/users/:id', async (req, res) => {
   }
 });
 
+// Proxy to User Service: create a new user.
 app.post('/api/users', async (req, res) => {
   try {
     const response = await axios.post(`${USER_SERVICE_URL}/users`, req.body);
@@ -71,6 +75,7 @@ app.post('/api/users', async (req, res) => {
   }
 });
 
+// Proxy to User Service: delete a user by ID.
 app.delete('/api/users/:id', async (req, res) => {
   try {
     const response = await axios.delete(`${USER_SERVICE_URL}/users/${req.params.id}`);
@@ -84,23 +89,18 @@ app.delete('/api/users/:id', async (req, res) => {
   }
 });
 
-// 404 handler
+// 404 handler for unknown routes.
 app.use((req, res) => {
   res.status(404).json({ error: 'Not found' });
 });
 
-// Error handler
+// Generic error handler for unhandled exceptions.
 app.use((err, req, res, next) => {
   console.error('Unhandled error:', err.message);
   res.status(500).json({ error: 'Internal server error' });
 });
 
-// TODO: Implement graceful shutdown
-// The process should handle SIGTERM and SIGINT signals to:
-// 1. Stop accepting new connections
-// 2. Finish processing in-flight requests
-// 3. Close connections to downstream services
-// 4. Exit cleanly
+
 
 const server = app.listen(PORT, () => {
   console.log(`API Gateway started on port ${PORT}`);

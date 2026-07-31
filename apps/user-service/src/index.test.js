@@ -1,15 +1,20 @@
+// Minimal tests for the User Service app wiring and route registration.
+// Confirms health and user CRUD route registration.
 const { describe, it } = require('node:test');
 const assert = require('node:assert');
 
+// Load the user service express app for route inspection tests.
 const { app } = require('./index');
 
 describe('User Service', () => {
   it('should export express app', () => {
+    // Confirm the module exposes a valid Express application.
     assert.ok(app);
     assert.strictEqual(typeof app.listen, 'function');
   });
 
   it('should have health endpoints registered', () => {
+    // Confirm the service defines health, liveness, and readiness routes.
     const routes = app._router.stack
       .filter((r) => r.route)
       .map((r) => ({ path: r.route.path, methods: Object.keys(r.route.methods) }));
@@ -25,6 +30,7 @@ describe('User Service', () => {
   });
 
   it('should have CRUD endpoints for users', () => {
+    // Confirm the service registers user CRUD endpoints.
     const routes = app._router.stack
       .filter((r) => r.route)
       .map((r) => ({ path: r.route.path, methods: Object.keys(r.route.methods) }));

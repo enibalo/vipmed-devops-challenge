@@ -1,3 +1,7 @@
+/**
+ * User Service API backed by Redis for simple user CRUD operations.
+ * Includes health checks, readiness probe, and sample data initialization.
+ */
 const express = require('express');
 const Redis = require('ioredis');
 const { v4: uuidv4 } = require('uuid');
@@ -5,10 +9,8 @@ const { v4: uuidv4 } = require('uuid');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// TODO: Implement structured JSON logging (e.g., winston, pino)
-// All logs should include: timestamp, level, message, and relevant context
 
-// Redis connection
+// Redis client configuration 
 const redis = new Redis({
   host: process.env.REDIS_HOST || 'localhost',
   port: parseInt(process.env.REDIS_PORT || '6379'),
@@ -21,9 +23,9 @@ redis.on('error', (err) => console.error('Redis error:', err.message));
 
 app.use(express.json());
 
-// TODO: Add request logging middleware
 
-// Health check endpoints
+
+// Health check endpoints for service diagnostics.
 app.get('/health', (req, res) => {
   res.json({ status: 'healthy', service: 'user-service', timestamp: new Date().toISOString() });
 });
@@ -32,6 +34,7 @@ app.get('/health/live', (req, res) => {
   res.json({ status: 'alive' });
 });
 
+// Ready endpoint verifies Redis dependency.
 app.get('/health/ready', async (req, res) => {
   try {
     await redis.ping();
@@ -44,11 +47,11 @@ app.get('/health/ready', async (req, res) => {
   }
 });
 
-// TODO: Add /metrics endpoint for Prometheus
+
 
 const USERS_KEY = 'users';
 
-// Initialize sample data
+// Create a function to initialize sample data
 const initializeData = async () => {
   try {
     await redis.connect();
@@ -67,7 +70,7 @@ const initializeData = async () => {
   }
 };
 
-// Get all users
+// Get all users 
 app.get('/users', async (req, res) => {
   try {
     const data = await redis.get(USERS_KEY);
@@ -79,7 +82,7 @@ app.get('/users', async (req, res) => {
   }
 });
 
-// Get user by ID
+// Get a single user by ID
 app.get('/users/:id', async (req, res) => {
   try {
     const data = await redis.get(USERS_KEY);
@@ -97,7 +100,7 @@ app.get('/users/:id', async (req, res) => {
   }
 });
 
-// Create user
+// Create a new user
 app.post('/users', async (req, res) => {
   try {
     const { name, email, role } = req.body;
@@ -133,7 +136,7 @@ app.post('/users', async (req, res) => {
   }
 });
 
-// Delete user
+// Delete an existing user by ID
 app.delete('/users/:id', async (req, res) => {
   try {
     const data = await redis.get(USERS_KEY);
@@ -155,19 +158,17 @@ app.delete('/users/:id', async (req, res) => {
   }
 });
 
-// 404 handler
+// 404 handler for unmatched API routes
 app.use((req, res) => {
   res.status(404).json({ error: 'Not found' });
 });
 
-// Error handler
+// Generic error handler for unexpected failures
 app.use((err, req, res, next) => {
   console.error('Unhandled error:', err.message);
   res.status(500).json({ error: 'Internal server error' });
 });
 
-// TODO: Implement graceful shutdown
-// Handle SIGTERM/SIGINT: close server, disconnect Redis, exit cleanly
 
 const start = async () => {
   await initializeData();
