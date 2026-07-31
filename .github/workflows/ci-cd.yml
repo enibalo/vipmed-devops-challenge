@@ -1,5 +1,3 @@
-# Author - Eni Balogun
-# Description - 
 
 name: CI/CD Pipeline 
 on: [push]
@@ -26,9 +24,9 @@ jobs:
           docker run -e TEST=true user-service npm run test  
 
   prod-deploy:
-    # configure job to run after a successful lint-and-test run
+    # configure this job to run after a successful lint and test 
     needs: lint-and-test  
-  # Deploying a prod image only runs for the main branch and for push tag events when it matches the pattern: v*
+    # checks if this change was meant to trigger a production image push and handles pushing production images 
     if: ${{ github.ref_name == 'main' || (github.ref_type == 'tag' && startsWith(github.ref_name, 'v')) }}
     runs-on: ubuntu-24.04
     steps: 
@@ -63,10 +61,10 @@ jobs:
           target: production
           push: true
           tags: ${{ steps.meta.outputs.tags }}
-  # Deploying a dev image only runs when the prod-deploy condition is not met 
   dev-deploy: 
-  # configure job to run after a successful lint-and-test run
+    # configure this job to run after a successful lint and test 
     needs: lint-and-test  
+    # checks if this change was meant to trigger a development image push and handles pushing development images 
     if: ${{ !( github.ref_name == 'main' || (github.ref_type == 'tag' && startsWith(github.ref_name, 'v')) ) }}
     runs-on: ubuntu-24.04
     steps: 
