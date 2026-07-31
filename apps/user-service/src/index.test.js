@@ -10,6 +10,7 @@ describe('User Service', () => {
   it('should export express app', () => {
     // Confirm the module exposes a valid Express application.
     assert.ok(app);
+    // The app should have the listen method available to start the server.
     assert.strictEqual(typeof app.listen, 'function');
   });
 
@@ -30,7 +31,7 @@ describe('User Service', () => {
   });
 
   it('should have CRUD endpoints for users', () => {
-    // Confirm the service registers user CRUD endpoints.
+ // Confirm the service registers user CRUD endpoints.
     const routes = app._router.stack
       .filter((r) => r.route)
       .map((r) => ({ path: r.route.path, methods: Object.keys(r.route.methods) }));
