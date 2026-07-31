@@ -20,7 +20,7 @@ This challenge evaluates your skills in containerization, Kubernetes orchestrati
 
 A simple microservices application consisting of:
 
-1. **API Gateway** - Node.js/Express service that routes requests (port 3000)
+1. **API Gateway** - Node.js/Express service that routes requests (port 3002)
 2. **User Service** - Node.js service that manages user CRUD operations (port 3001)
 3. **Redis** - Data store for user data (port 6379)
 
@@ -143,27 +143,21 @@ A broken deployment exists in `k8s/broken/`. These manifests were deployed to pr
 # 1. Create local cluster
 kind create cluster --name devops-challenge
 
-# 2. Build and load images
-docker build -t devops-challenge/api-gateway:local ./apps/api-gateway
-docker build -t devops-challenge/user-service:local ./apps/user-service
-kind load docker-image devops-challenge/api-gateway:local --name devops-challenge
-kind load docker-image devops-challenge/user-service:local --name devops-challenge
-
-# 3. Deploy
+# 2. Deploy
 kubectl apply -k k8s/overlays/dev
 
-# 4. Test
-kubectl port-forward svc/api-gateway 3000:3000
-curl http://localhost:3000/health
-curl http://localhost:3000/api/users
+# 3. Test
+kubectl port-forward svc/api-gateway 3002:3002
+curl http://localhost:3002/health
+curl http://localhost:3002/api/users
 ```
 
 ### Using Docker Compose
 
 ```bash
 docker-compose up -d
-curl http://localhost:3000/health
-curl http://localhost:3000/api/users
+curl http://localhost:3002/health
+curl http://localhost:3002/api/users
 ```
 
 ---
@@ -181,77 +175,30 @@ curl http://localhost:3000/api/users
 │   │   │   └── index.test.js
 │   │   ├── package.json
 │   │   ├── package-lock.json
-│   │   ├── .dockerignore        # CREATE THIS
-│   │   └── Dockerfile           # CREATE THIS
+│   │   ├── .dockerignore        
+│   │   └── Dockerfile           
 │   └── user-service/
 │       ├── src/
 │       │   ├── index.js
 │       │   └── index.test.js
 │       ├── package.json
 │       ├── package-lock.json
-│       ├── .dockerignore        # CREATE THIS
-│       └── Dockerfile           # CREATE THIS
+│       ├── .dockerignore        
+│       └── Dockerfile           
 ├── k8s/
-│   ├── base/                    # CREATE THIS
-│   ├── overlays/
-│   │   ├── dev/                 # CREATE THIS
-│   │   └── prod/                # CREATE THIS
-│   └── broken/                  # TROUBLESHOOT THIS (Part 5)
+│   ├── base/                    
+│   |__ overlays/
+│      ├── dev/                 
+│      └── prod/                
+│   
 ├── .github/
 │   └── workflows/
-│       └── ci-cd.yml            # CREATE THIS
+│       └── ci-cd.yml            
 └── docs/
     ├── architecture.md          # UPDATE with your decisions
     ├── monitoring-strategy.md   # UPDATE with your strategy
     └── troubleshooting.md       # UPDATE with issues found
 ```
-
----
-
-## Evaluation Criteria
-
-| Category | Weight | What We Look For |
-|----------|--------|------------------|
-| **Docker** | 15% | Multi-stage builds, security, .dockerignore, graceful shutdown |
-| **Kubernetes** | 25% | Health checks, resource management, HPA, Network Policies, Kustomize |
-| **CI/CD** | 20% | Pipeline design, image tagging, secrets, branching strategy |
-| **Monitoring** | 15% | Prometheus metrics, structured logging, alerting strategy |
-| **Troubleshooting** | 15% | Ability to identify and explain issues in broken manifests |
-| **Documentation** | 10% | Clarity, completeness, trade-offs explained |
-
----
-
-## Bonus Points
-
-- [ ] Implement GitOps with ArgoCD or Flux
-- [ ] Implement canary or blue-green deployments
-- [ ] Add integration tests in the pipeline
-- [ ] Set up distributed tracing (OpenTelemetry)
-- [ ] Implement Pod Disruption Budgets
-- [ ] Add security scanning (Trivy, Snyk) in the pipeline
-
----
-
-## Submission
-
-1. **Fork this repository**
-2. **Create a branch** with your name: `solution/your-name`
-3. **Implement the challenge**
-4. **Create a Pull Request** to this repository
-5. **Include in your PR description:**
-   - Time spent on each part
-   - Any assumptions made
-   - What you would improve with more time
-
----
-
-## Tips
-
-- Start with Docker, then Kubernetes, then CI/CD
-- Test locally before adding CI/CD
-- Document as you go, not at the end
-- Quality over quantity - it's better to do 4 parts well than 5 parts poorly
-- Read the broken manifests carefully - some issues are subtle
 
 ---
 
@@ -266,7 +213,3 @@ This challenge is not about perfection or completing every single item. What we 
 - **Document what you don't know.** If you're unsure about something, say so and explain what you would research or ask about.
 
 We're looking for someone who can operate production infrastructure with confidence, make sound decisions under uncertainty, and communicate clearly about technical problems.
-
----
-
-**Good luck!**
