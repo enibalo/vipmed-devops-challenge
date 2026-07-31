@@ -24,6 +24,8 @@ Draw or describe the architecture of your deployment.
 
 - I chose to use the alpine base image for the production build stage because it's minimal Docker image which takes up only 5MB space on its own. A small base image will lead to smaller final image, making pushing builds to production faster.    
 
+- I chose google-backed and endorsed distroless image it's much smaller and its more secure. reduced attack surface. 
+
 - Security considerations:
 - Applied the principle of least privilege: I made a non-root user in the production stage. I assigned all files to them, and then I made the Docker container switch from running as a root user to the non-root user. 
 - Time-tested tools: Used official Docker images.  
