@@ -1,7 +1,7 @@
 # prod-dependency caching stage
 FROM node:22-alpine AS prod-dependency-cache
 
-# choose working directory within the docker container 
+# set the working directory 
 WORKDIR /app
 
 # copy the package.json from the host machine 
@@ -13,7 +13,7 @@ RUN npm ci --omit=dev
 # dev-dependency caching stage
 FROM node:22-alpine AS dev-dependency-cache
 
-# choose the working directory within the docker container
+# set the working directory within the docker container
 WORKDIR /app
 
 # copy the package.json from the host machine 
