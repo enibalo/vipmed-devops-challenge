@@ -4,9 +4,9 @@ services:
     build:
       context: ./apps/api-gateway
       dockerfile: Dockerfile
+      target: development
       tags:
         - "enibalo/api-gateway:dev"
-    entrypoint: ["npm", "run", "dev"]
     ports:
       - "3002:3002"
     volumes: 
@@ -32,9 +32,9 @@ services:
     build:
       context: ./apps/user-service
       dockerfile: Dockerfile
+      target: development
       tags:
         - "enibalo/user-service:dev"
-    entrypoint: ["npm", "run", "dev"]
     ports:
       - "3001:3001"
     volumes: 
