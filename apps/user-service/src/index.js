@@ -12,11 +12,14 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 const TEST = process.env.TEST 
 
+// Create the Prometheus client for collecting metrics.
 const client = require('prom-client');
 
 const collectDefaultMetrics = client.collectDefaultMetrics;
 const register = new client.Registry();
-const prefix = 'api_gateway_';
+
+// prefix logged metrics to help identify the source service in a multi-service setup
+const prefix = 'user_service_';
 collectDefaultMetrics({ prefix, register });
 
 // Create a histogram metric for tracking request durations in miliseconds 
@@ -29,7 +32,7 @@ const httpRequestDurationMiliseconds = new client.Histogram({
     registers: [register],
 });
 
-
+// Create a logger using winston for structured logging of HTTP requests and errors.
 const winston = require("winston");
 
 const logger = winston.createLogger({
@@ -46,7 +49,7 @@ const logger = winston.createLogger({
   ]
 });
 
-// Redis connection
+// configure the redis client 
 const redis = new Redis({
   host: process.env.REDIS_HOST || 'localhost',
   username: process.env.REDIS_USERNAME, 
@@ -56,14 +59,14 @@ const redis = new Redis({
   lazyConnect: true
 });
 
+// Log Redis events using the winston logger for observability
 redis.on('connect', () => logger.info('Connected to Redis'));
 redis.on('error', (err) => logger.error('Redis error: ' + err.message));
 
-// Parse incoming JSON payloads for POST requests.
+// Middleware to parse incoming JSON payloads
 app.use(express.json());
 
-// Middleware to record request durations
-// All logs should include: timestamp, level, message, and request context
+// Middleware to record request durations, timestamp, level, message, and request context
 app.use((req, res, next) => {
       const end = httpRequestDurationMiliseconds.startTimer();
       res.on('finish', () => {
@@ -78,24 +81,26 @@ app.use((req, res, next) => {
     next();
 });
 
-// Health check endpoints
+// Health check endpoint for container orcehstration 
 app.get('/health', (req, res) => {
   // Return a simple health payload identifying this service.
   res.json({ status: 'healthy', service: 'user-service', timestamp: new Date().toISOString() });
 });
 
+// Liveliness check endpoint for container orcehstration.
 app.get('/health/live', (req, res) => {
   // Return a minimal live response for liveness probes.
   res.json({ status: 'alive' });
 });
 
-// Ready endpoint verifies Redis dependency.
+// Readiness check endpoint to ensure that dependencies are available before routing traffic to the service. 
 app.get('/health/ready', async (req, res) => {
   try {
     // Ping Redis to confirm the data store is reachable.
     await redis.ping();
     res.json({ status: 'ready', dependencies: { redis: 'up' } });
   } catch (error) {
+    // If Redis is down or unreachable, return a not ready status.
     logger.error('Failed to connect to redis: ' + error.message);
     res.status(503).json({
       status: 'not ready',
@@ -104,6 +109,7 @@ app.get('/health/ready', async (req, res) => {
   }
 });
 
+// Expose Prometheus metrics for scraping. 
 app.get('/metrics', (req, res) => {
   res.set('Content-Type', register.contentType);
   res.end(async () => await register.metrics());
@@ -111,7 +117,8 @@ app.get('/metrics', (req, res) => {
 
 const USERS_KEY = 'users';
 
-// Create a function to initialize sample data
+// Initialize sample data in Redis if no users exist yet.
+// - Connects to Redis and seeds a small set of example users for local/dev usage.
 const initializeData = async () => {
   try {
     // Connect to Redis before reading or writing data.
@@ -128,6 +135,7 @@ const initializeData = async () => {
       logger.info('Sample data initialized');
     }
   } catch (error) {
+    // Log a warning if Redis is unreachable or data initialization fails, but allow the service to continue running.
     logger.warn('Could not initialize Redis data: ' + error.message);
   }
 };
@@ -141,6 +149,7 @@ app.get('/users', async (req, res) => {
     // Return the full user list and a total count.
     res.json({ data: users, total: users.length });
   } catch (error) {
+    // Log the error and return an error status code to the client.
     logger.error('Failed to get users: ' + error.message);
     res.status(500).json({ error: 'Failed to retrieve users' });
   }
@@ -162,6 +171,7 @@ app.get('/users/:id', async (req, res) => {
 
     res.json(user);
   } catch (error) {
+    // Log the error and return an error status code to the client.
     logger.error('Failed to get user: ' + error.message);
     res.status(500).json({ error: 'Failed to retrieve user' });
   }
@@ -170,21 +180,25 @@ app.get('/users/:id', async (req, res) => {
 // Create a new user
 app.post('/users', async (req, res) => {
   try {
+    // parse the incoming request body for required fields
     const { name, email, role } = req.body;
 
     // Validate required fields before processing.
     if (!name || !email) {
+      // Return a bad/invalid request status code if required fields are missing.
       return res.status(400).json({ error: 'Name and email are required' });
     }
 
+    // get the current list of users from Redis
     const data = await redis.get(USERS_KEY);
     const users = data ? JSON.parse(data) : [];
 
-    // Check for duplicate email.
+    // Check for users with the same email to prevent duplicates and return a conflict status code if found.
     if (users.find(u => u.email === email)) {
       return res.status(409).json({ error: 'Email already exists' });
     }
 
+    // create a new user object to send back to the client and persist in Redis
     const newUser = {
       id: uuidv4(),
       name,
@@ -198,8 +212,11 @@ app.post('/users', async (req, res) => {
     await redis.set(USERS_KEY, JSON.stringify(users));
 
     logger.info('User created: ' + newUser.id);
+
+    // Return the newly created user with a 201 Created status code.
     res.status(201).json(newUser);
   } catch (error) {
+    // Log the error and return an error status code to the client.
     logger.error('Failed to create user: ' + error.message);
     res.status(500).json({ error: 'Failed to create user' });
   }
@@ -225,6 +242,7 @@ app.delete('/users/:id', async (req, res) => {
     logger.info('User deleted: ' +  req.params.id);
     res.status(204).send();
   } catch (error) {
+    // Log the error and return an error status code to the client.
     logger.error('Failed to delete user: ' + error.message);
     res.status(500).json({ error: 'Failed to delete user' });
   }
@@ -250,7 +268,6 @@ function shutdownServer(server)  {
   // Stop accepting new connections
   server.close(async () => {
     logger.info("user-service server closed");
-    // TODO: use await with connection.close() to close downstream services...
     
     // Close Redis connection
     await redis.quit();

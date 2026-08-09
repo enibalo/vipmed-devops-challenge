@@ -12,13 +12,16 @@ const PORT = process.env.PORT || 3000;
 const USER_SERVICE_URL = process.env.USER_SERVICE_URL || 'http://localhost:3001';
 const ENVIRONMENT = process.env.NODE_ENV || "production"
 
+// Create the prometheus client: used to collect metrics
 const client = require('prom-client');
-
 const collectDefaultMetrics = client.collectDefaultMetrics;
 const register = new client.Registry();
+
+// prefix metrics with the service name for easier identification in Prometheus
 const prefix = 'api_gateway_';
 collectDefaultMetrics({ prefix, register });
 
+// Create a logger using winston for structured logging of HTTP requests and errors.
 const winston = require("winston");
 
 const logger = winston.createLogger({
@@ -35,10 +38,8 @@ const logger = winston.createLogger({
   ]
 });
 
-
+// Middleware to parse incoming JSON payloads
 app.use(express.json());
-
-
 // Create a histogram metric for tracking request durations in miliseconds 
 const httpRequestDurationMiliseconds = new client.Histogram({
     name: 'http_request_duration_ms',
@@ -49,8 +50,7 @@ const httpRequestDurationMiliseconds = new client.Histogram({
     registers: [register],
 });
 
-// Middleware to record request durations
-// All logs should include: timestamp, level, message, and request context
+// Middleware to record request durations, timestamp, level, message, and request context
 app.use((req, res, next) => {
       const end = httpRequestDurationMiliseconds.startTimer();
       res.on('finish', () => {
@@ -65,24 +65,26 @@ app.use((req, res, next) => {
     next();
 });
 
-// Health check endpoints for liveness and readiness probes.
+// Health check endpoint for container orcehstration 
 app.get('/health', (req, res) => {
-  // Return a simple service health response for readiness/liveness checks.
   res.json({ status: 'healthy', service: 'api-gateway', timestamp: new Date().toISOString() });
 });
 
+// Liveliness check endpoint for container orchestration systems.
 app.get('/health/live', (req, res) => {
   // Return a lightweight alive response used by liveness probes.
   res.json({ status: 'alive' });
 });
 
-// Ready endpoint verifies the user-service dependency.
+
+// Readiness check endpoint to ensure that dependencies are available before routing traffic to the service. 
 app.get('/health/ready', async (req, res) => {
   try {
     // Ping the downstream user service health endpoint.
     await axios.get(`${USER_SERVICE_URL}/health`, { timeout: 2000 });
     res.json({ status: 'ready', dependencies: { userService: 'up' } });
   } catch (error) {
+    // If the user service is down or unreachable, return a not ready status.
     logger.error('Failed to connect to user-service: ' + error.message);
     res.status(503).json({
       status: 'not ready',
@@ -92,6 +94,7 @@ app.get('/health/ready', async (req, res) => {
 });
 
 
+// Expose Prometheus metrics for scraping. 
 app.get('/metrics', (req, res) => {
   res.set('Content-Type', register.contentType);
   res.end(async () => await register.metrics());
@@ -105,6 +108,7 @@ app.get('/api/users', async (req, res) => {
     // Relay the downstream list of users unchanged.
     res.json(response.data);
   } catch (error) {
+    // Log the error and return a proxy error status code to the client.
     logger.error('Failed to fetch users: ' + error.message);
     res.status(502).json({ error: 'Failed to fetch users from user-service' });
   }
@@ -181,7 +185,6 @@ function shutdown()  {
   // Stop accepting new connections
   server.close(async () => {
     logger.info("api-gateway server closed");
-    // use await with connection.close() to close downstream services...
     
     // gracefully end the server process 
     process.exit(0)
