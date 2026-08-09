@@ -3,11 +3,6 @@
 node_modules
 npm-debug.log
 
-# Build outputs
-dist
-build
-coverage
-
 # Development files
 .git
 .gitignore
@@ -17,7 +12,7 @@ docs
 # IDE
 .vscode
 
-# Environment files (secrets!)
+# Environment files 
 .env
 .env.*
 !.env.example
