@@ -1,16 +1,16 @@
-# prod-dependency caching stage
+# Install the project dependencies in a dedicated stage to prevent dependency installation layers from being rebuilt unnecessarily.
 FROM node:22-alpine AS prod-dependency-cache
 
 # set working directory 
 WORKDIR /app
 
-# copy the package.json from the host machine 
+# Copy the package manifests to use into the container  
 COPY package*.json ./
 
-# install all dependcies but omit development-only dependencies 
+# Install only production dependencies for a smaller runtime image.
 RUN npm ci --omit=dev
 
-# dev-dependency caching stage
+# Install  the project dependencies in a dedicated stage to prevent dependency installation layers from being rebuilt unnecessarily.
 FROM node:22-alpine AS dev-dependency-cache
 
 # choose the working directory within the docker container
@@ -19,59 +19,61 @@ WORKDIR /app
 # copy the package.json from the host machine 
 COPY package*.json ./
 
-# install all dependencies including development-only dependencies
+# install all dependencies including dev-only dependencies
 RUN npm ci
 
-# production runtime stage
+# Final stage of the production image. It uses a minimal distroless runtime for production to reduce size and attack surface.
 FROM gcr.io/distroless/nodejs22-debian12:nonroot AS production
 
-# choose the working directory 
+# choose the working directory iin the container
 WORKDIR /app
 
-# set default environment variables in case a .env file is not provided 
+# Create default environment variables for non-secret configurations to make the image ready-to-run out of the box.
 ENV PORT=3000 \
     USER_SERVICE_URL=http://localhost:3001 \
     LOG_LEVEL=info \
     NODE_ENV=production
 
-# copy the necessary files into the file system
+# # copy cached dependencies and package manifest into the container
 COPY --from=prod-dependency-cache /app/node_modules ./node_modules
 COPY --from=prod-dependency-cache /app/package.json  ./
+
+# copy the source code into the container
 COPY src ./src
 
-# document the port that the api-gateway listens on
+# document the port that the service listens on
 EXPOSE $PORT
 
-#start the server 
+# Start the application using exec notation to ensure that the Node.js server receives signals like SIGTERM 
 CMD [ "src/index.js"]
 
 
-# development stage
+# Final stage of the dev image. It uses a full Node.js runtime to support dev tools. 
 FROM node:22.16.0 AS development
 
 # set the working directory in the docker container
 WORKDIR /app
 
-# set default environment variables in case a .env file is not provided 
+# Create the default environment variables for non-secret configurations to make the image ready-to-run out of the box.
 ENV PORT=3000 \
     USER_SERVICE_URL=http://localhost:3001 \
     LOG_LEVEL=info \
     NODE_ENV=production
 
 
-# install the packages needed for developers 
+# Install useful utilities for local development
 RUN apt-get update \ 
     && apt-get install -y git \ 
     && apt-get install -y nano 
 
-# document the port that the api-gateway listens on
+# document the port that the service listens on
 EXPOSE $PORT
 
-# copy dependencies, config and source files into the file system 
+# copy dependencies, config and source files into the container 
 COPY --from=dev-dependency-cache /app/node_modules ./node_modules 
 COPY --from=dev-dependency-cache /app/package*.json  ./
 COPY eslint.config.mjs ./
 COPY src ./src
 
-# start the server in dev mode
+# Start the application using exec notation to ensure that the Node.js server receives signals like SIGTERM 
 CMD ["node", "--watch" ,"src/index.js"]

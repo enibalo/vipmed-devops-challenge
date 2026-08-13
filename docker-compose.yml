@@ -1,22 +1,28 @@
 services:
   api-gateway:
+    # set the name of the container so it can be concicely referenced in docker commands
     container_name: api-gateway
     build:
+     # configure the build context and target build stage 
       context: ./apps/api-gateway
       dockerfile: Dockerfile
       target: development
+      # add the tags which should be applied to the built image 
       tags:
         - "enibalo/api-gateway:dev"
+    # forward the listed container's ports to the host machine's ports
     ports:
       - "3002:3002"
     volumes: 
+    # create bind-mounts to the host machine's project files so that changes are reflected in the container without rebuilding the image
       - ./apps/api-gateway/package.json:/app/package.json:ro
       - ./apps/api-gateway/package-lock.json:/app/package-lock.json:ro
       - ./apps/api-gateway/src:/app/src:ro
-    # NOTE: In order to run kubernetes locally, the env files need to be in the k8s directory 
+    # add configuration files. NOTE: In order to run kubernetes locally, the env files need to be in the k8s directory 
     env_file:
       - ./k8s/base/env/api-gateway.env
       - ./k8s/overlays/dev/api-gateway.env
+    # create a dependency relationship to ensure that the user-service is healthy before starting making requests to it
     depends_on:
       user-service:
         condition: service_healthy
@@ -28,23 +34,30 @@ services:
       start_period: 15s
 
   user-service:
+  # set the name of the container so it can be concicely referenced in docker commands
     container_name: user-service
     build:
+    # configure the build context and target build stage
       context: ./apps/user-service
       dockerfile: Dockerfile
       target: development
+       # add the tags which should be applied to the built image 
       tags:
         - "enibalo/user-service:dev"
+    # forward the listed container's ports to the host machine's ports
     ports:
       - "3001:3001"
     volumes: 
+    # create bind-mounts to host-machine's project files so that changes are reflected in the container without rebuilding the image
       - ./apps/user-service/package.json:/app/package.json:ro
       - ./apps/user-service/package-lock.json:/app/package-lock.json:ro
       - ./apps/user-service/src:/app/src:ro
+    # add configuration files. NOTE: In order to run kubernetes locally, the env files need to be in the k8s directory 
     env_file: 
       - ./k8s/base/env/user-service.env
       - ./k8s/base/env/secrets.env
       - ./k8s/overlays/dev/user-service.env
+    # create a dependency relationship to ensure that the database is healthy before the service starts making database requests 
     depends_on:
       redis:
         condition: service_healthy
@@ -56,18 +69,24 @@ services:
       start_period: 15s
 
   redis:
+  # set the name of the container so it can be concicley referenced in docker commands
     container_name: redis
+  # set the image for the container
     image: redis:7-alpine
+  # forward the listed container's ports to the host machine's ports
     ports:
       - "6379:6379"
     volumes:
+    # create a named volume to persist the redis data across container restarts
       - redis-data:/data
+      # copy the redis configuration file into the container
       - ./k8s/base/env/users.acl:/usr/local/etc/redis/users.acl:ro
+    # override the default command to start the redis server with the custom configuration file
     command:
       - redis-server
       - --aclfile
       - /usr/local/etc/redis/users.acl
-
+    # healthcheck so the user-service can tell if redis is ready to accept connections
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
