@@ -1,3 +1,5 @@
+# User Service Deployment - handles user-related business logic.
+# Internal service that is only accessible via the api-gateway.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -6,6 +8,8 @@ metadata:
     app: user-service-app
 spec:
   replicas: 3
+  # Rolling update strategy: add 1 new pod before removing any old ones
+  # (maxSurge: 1, maxUnavailable: 0) to ensure zero downtime during deploys.
   strategy:
     rollingUpdate:
       maxSurge: 1
@@ -21,9 +25,11 @@ spec:
       containers:
       - name: user-service-app
         image:  "enibalo/user-service:prod"
+        # Inject environment variables from the user-service-env ConfigMap
         envFrom:
         - configMapRef:
             name: user-service-env
+        # Inject sensitive credentials (e.g., Redis password) from the user-service-secrets Secret 
         - secretRef: 
            name: user-service-secrets
         ports:
@@ -35,6 +41,8 @@ spec:
           limits:
             cpu: 200m
             memory: 200Mi
+        # Liveness probe: if /health/live fails 3 times, Kubernetes restarts
+        # the container. Checks start after 15s and run every 10s.
         livenessProbe:
           httpGet:
             path: /health/live
@@ -44,6 +52,8 @@ spec:
           failureThreshold: 3
           successThreshold: 1
           timeoutSeconds: 5
+        # Readiness probe: if /health/ready fails 2 times, the pod is removed
+        # from Service endpoints until it recovers. Checks every 5s.
         readinessProbe:
           httpGet:
             path: /health/ready
@@ -54,6 +64,8 @@ spec:
           timeoutSeconds: 3
           
 ---
+# User Service Service - ClusterIP for internal access only.
+# Other pods can reach this service through the hostname: user-service
 apiVersion: v1
 kind: Service
 metadata:

@@ -1,3 +1,5 @@
+# Dev namespace - isolates all development workloads from production.
+# All resources in the dev overlay are deployed into this namespace.
 apiVersion: v1
 kind: Namespace
 metadata:

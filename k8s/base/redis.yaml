@@ -1,3 +1,5 @@
+# Redis Service - ClusterIP for internal access only.
+# Other pods (e.g., user-service) reach Redis via this service name.
 apiVersion: v1
 kind: Service
 metadata:
@@ -13,6 +15,8 @@ spec:
   type: ClusterIP
 
 ---
+# Redis is managed as a StatefulSet because Redis requires stable
+# network identity and persistent storage per replica (via volumeClaimTemplates).
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -23,16 +27,21 @@ spec:
       app: redis 
   serviceName: "redis"
   replicas: 1 
+  # Wait 10 seconds after a pod is ready before considering it available.
+  # Prevents traffic from being routed to a pod that restarts immediately.
   minReadySeconds: 10 
   template:
     metadata:
       labels:
         app: redis 
     spec:
+      # Give Redis 10 seconds to flush data to disk on shutdown.
       terminationGracePeriodSeconds: 10
       containers:
       - name: redis
         image: "redis:7-alpine"
+        # Start Redis with an ACL file that defines user permissions.
+        # The ACL file is mounted from a Secret (see volumes below).
         command: ["redis-server", "--aclfile", "/usr/local/etc/redis/users.acl"]
         ports:
         - containerPort: 6379  
@@ -44,18 +53,23 @@ spec:
             cpu: "1"
             memory: 2Gi
         volumeMounts:
+        # Persistent volume for Redis data (RDB/AOF persistence files).
         - name: data
           mountPath: /data
+        # ACL file mounted from a Secret to enforce user authentication.
         - name: aclfile
           mountPath: /usr/local/etc/redis
       volumes:
         - name: aclfile
           secret:
             secretName: redis-aclfile
+  # volumeClaimTemplates create a PersistentVolumeClaim for each replica,
+  # giving each Redis pod its own dedicated storage that survives restarts.
   volumeClaimTemplates:
   - metadata:
       name: data
     spec:
+      # ReadWriteOncePod ensures only a single node can mount the volume
       accessModes: [ "ReadWriteOnce" ]
       resources:
         requests:

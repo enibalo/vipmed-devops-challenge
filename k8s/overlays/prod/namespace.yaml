@@ -1,3 +1,5 @@
+# Prod namespace - isolates all production workloads from development.
+# All resources in the prod overlay are deployed into this namespace.
 apiVersion: v1
 kind: Namespace
 metadata:

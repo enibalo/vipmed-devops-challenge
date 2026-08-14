@@ -1,10 +1,14 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-# creating namepace
+# Dev overlay - deploys all resources into the "dev" namespace with
+# development-specific images, resource limits, and entrypoint commands.
+
+# Deploy all resources into the dev namespace to isolate
+# development workloads from production.
 namespace: dev
 
-# change images to their development versions  
+# Override the production image tags with development builds.
 images:
 - name: enibalo/user-service:prod
   newName: enibalo/user-service
@@ -13,13 +17,14 @@ images:
   newName: enibalo/api-gateway
   newTag: dev
 
-# set resources 
+# Include the base kustomization plus the dev namespace definition.
 resources:
 - ../../base
 - namespace.yaml
 
 
-# change env variables that need a different value for development
+# Merge dev-specific environment variables into the base ConfigMaps.
+# behavior: merge means dev values override base values for the same keys
 configMapGenerator:
 - name: api-gateway-env
   behavior: merge
@@ -32,7 +37,7 @@ configMapGenerator:
 
 
 patches:
-# adjust resource limits and requests for each service's containers
+# Reduce resource requests/limits for each service to fit within dev cluster capacity.
 - patch: |-
     - op: replace
       path: /spec/template/spec/containers/0/resources/requests/cpu
@@ -68,7 +73,7 @@ patches:
 
 
 replacements: 
-# scale down number of replicas for each service for a  development environment 
+# Scale down to a single replica per service in dev to conserve resources.
 - sourceValue: "1"
   targets:
   - select:
@@ -76,5 +81,3 @@ replacements:
       name: user-service-app|api-gateway-app
     fieldPaths:
       - spec.replicas
-
-
