@@ -1,7 +1,5 @@
 # Architecture Documentation
 
-> **Note to Candidate:** Replace this template with your actual architecture decisions.
-
 ## System Architecture
 
 Draw or describe the architecture of your deployment.
@@ -9,45 +7,18 @@ Draw or describe the architecture of your deployment.
 ## Your Decisions
 
 ### Docker Strategy 
+### 1. Base Image Choice & Multi-Stage Build Strategy
 
-- Multi-stage build approach:
-- I decided to split up the image building process into two stages: dependency stage and build stage. As it was requested no real need for it honestly. It makes it more readable/maintainable I guess. 
+Implemented a multi-stage build with separate dependency, development, and production stages. This kept the final production image at **220 MB** by avoiding unnecessary development tooling while allowing developers access to dev tools in the devlopment image. Used official, version-pinned Docker Node.js and Google Distroless images to ensure a consistent and secure run-time environment. A separate dependency stage contains all pre-application start up routines to architecturally enforce layer optimization. The Distroless image was used for the production image and provided a minimal runtime that reduces image size, deployment time, and attack surface while the Node.js images were used for all the other stages and came packed with extra-tooling which could be used in debugging.
 
-- I decided to have a dependency and build stage for production and a different dependency and build stage development. Developers need extra toolding and development dependencies that are unnecessary in production and that would increase the attack surface of the production container. 
+### 2. Security & Layer Optimization
 
-- If I had more complex build process I would have created a shared stage called "prep" for shared steps that need to happen for both production and development images. 
+Applied least-privilege principles by running the production container as a **non-root user** and assigning appropriate file ownership. Optimized Docker layers by placing infrequently changing dependencies before source-code changes and combining related `RUN` commands to minimize unnecessary layers and rebuilds.
 
-- Base image choice:
-- I chose to use the official Node image for the dependency and development stages as it would contain everything I needed to complete to create a Nodejs image. Size was not a concern so the default image base was fine. Its also well-tested and developed by trusted contributors. 
+### 3. Reliability & Maintainability
 
-- I chose to use version 22.16.0 of the official Node docker image for the development and docker stage to avoid unexpected changes caused by the future releases of the image. 
+Implemented graceful shutdown handling for `SIGTERM` and `SIGINT` in the API Gateway and User Service, using Docker's exec-form `CMD` and the `node` command so Node.js runs as PID 1 and receives signals directly. Added Dockerfile comments for maintainability and documented the reasoning behind key architectural decisions to make future modifications easier for the development team.
 
-- I chose to use the alpine base image for the production build stage because it's minimal Docker image which takes up only 5MB space on its own. A small base image will lead to smaller final image, making pushing builds to production faster.    
-
-- I chose google-backed and endorsed distroless image it's much smaller and its more secure. reduced attack surface. 
-
-- Security considerations:
-- Applied the principle of least privilege: I made a non-root user in the production stage. I assigned all files to them, and then I made the Docker container switch from running as a root user to the non-root user. 
-- Time-tested tools: Used official Docker images.  
-
-- Layer optimization:
-- Frequently changing layers ( copying the source code ) is defined after infrequent layers. This prevents cascading effects of unecessary re-builds. 
-- Conjoined RUN commmands using the "&&" operator, this condenses multiple RUN layers into one. 
-
-- Implement graceful shutdown: 
--  I added cleanup code within the api-gateway and user-service index.js files to handle SIGTERM and SIGINT signals
-- I used the exec form of the CMD to ensure that the node process runs directly as the process's PID 1 and gets passed any SIGTERM and SIGINT signals 
-- I did not use npm to start the server's as npm would not forward signals to the node process, and would prevent us from runnning the graceful shutdown code. 
-
-// TODO: Implement graceful shutdown
-// The process should handle SIGTERM and SIGINT signals to:
-// 1. Stop accepting new connections -> 
-// 2. Finish processing in-flight requests -> 
-// 3. Close connections to downstream services -> 
-// 4. Exit cleanly ->
-
-- Documentation: 
-- I left comments in the Docker file to ensure that future team mates can modify it smoothly. 
 
 ### Kubernetes Design
 
@@ -70,12 +41,6 @@ Draw or describe the architecture of your deployment.
 - How would you manage secrets in production? (e.g., Vault, Sealed Secrets, external-secrets, SOPS)
 - How do you handle different environments (dev/staging/prod)?
 
-### Monitoring Strategy
-
-- Metrics collected:
-- Logging format:
-- Alerting rules (proposed):
-
 ## Trade-offs & Assumptions
 
 1. **Trade-off 1:**
@@ -93,14 +58,3 @@ Document security measures you implemented.
 2.
 3.
 
-## Time Spent
-
-| Task | Time |
-|------|------|
-| Part 1: Docker | |
-| Part 2: Kubernetes | |
-| Part 3: CI/CD | |
-| Part 4: Monitoring | |
-| Part 5: Troubleshooting | |
-| Documentation | |
-| **Total** | |
