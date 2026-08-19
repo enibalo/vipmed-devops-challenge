@@ -14,12 +14,12 @@ Draw or describe the architecture of your deployment
 ## Your Decisions
 
 ### Docker Strategy 
-### 1. Base Image Choice Multi-Stage Build Strategy
+### 1. Base Image Choice 
 
- Used official, version-pinned Docker Node.js for development and Google Distroless images for production to ensure a consistent and secure run-time environment. The Distroless image was the base image for production and provided a minimal runtime that reduces image size, and attack surface. This resulted in final image size of **~220 MB**.  The Node.js images was used for the dev-image as it was packed with extra-tooling which could be used in debugging. 
+ Used official, version-pinned Docker Node.js for development and Google Distroless images for production to ensure a consistent and secure run-time environment. The Distroless image provided a minimal runtime that reduced image size, and attack surface and resulted in final image size of **~220 MB**.  The Node.js images provided extra-tooling which could be used in debugging. 
  
  ### 2. Multi-Stage Build Strategy
- A separate dependency stage comes before the final stage for production and development. This stage archtecturally enforces a layer optimized execution of rarely change pre-application routines before copying the source code. Finally, a separate final stage was used for production and developemt to keep unnecessary dev-tooling outside of the production image. 
+ A separate dependency stage comes before the final stage for production and development. This stage organized rarely changing pre-application routines into one section before copying the source code. This would prevent unnecessary layer re-builds making builds faster. Finally, there was a separate final stage for production and another for development to keep unnecessary dev-tooling outside of the production image. 
 
 ### 3. Security & Layer Optimization
 
@@ -34,7 +34,7 @@ Implemented graceful shutdown handling for `SIGTERM` and `SIGINT` in the API Gat
 
 ## 1. Environment Separation and Resource Allocation
 
-Namespaces are used to logically partition development and production resources. Resource limits and requests were based on official Redis recommendations for the database and on Kubernetes examples and reliable technical articles for the Node.js services. Production receives roughly twice the resources of development to account for the signifant difference in throughput the client-facing application would receive. 
+Namespaces are used to logically partition development and production resources. Resource limits and requests were based on official Kubernetes examples, Redis documentation, and reliable technical articles for the Node.js services. Production receives roughly twice the resources of development to account for the signifant difference in throughput the client-facing application would receive. 
 
 ## 2. Health Checks and Scaling
 
