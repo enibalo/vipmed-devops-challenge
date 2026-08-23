@@ -1,15 +1,15 @@
 #  Project overview 
 
-A pipeline and ....
+Based on the vipmed-projects online devops challenge for new hires. As a DevOps candidate charged with demonstrating my understanding of docker, k8s, and pipelines.  
 
 # Architecture Documentation
 
 ## System Architecture
 
 Draw or describe the architecture of your deployment
-- diagram of an API request of a user 
-- ci/cd pipeline 
-- ask chatpgt check video for one more
+- Insert diagrams & project overview
+- Improvement section. 
+- Final edits. goal => concise and high-level. 
 
 ## Your Decisions
 
@@ -19,7 +19,7 @@ Draw or describe the architecture of your deployment
  Used official, version-pinned Docker Node.js for development and Google Distroless images for production to ensure a consistent and secure run-time environment. The Distroless image provided a minimal runtime that reduced image size, and attack surface and resulted in final image size of **~220 MB**.  The Node.js images provided extra-tooling which could be used in debugging. 
  
  ### 2. Multi-Stage Build Strategy
- A separate dependency stage comes before the final stage for production and development. This stage organized rarely changing pre-application routines into one section before copying the source code. This would prevent unnecessary layer re-builds making builds faster. Finally, there was a separate final stage for production and another for development to keep unnecessary dev-tooling outside of the production image. 
+ A separate dependency stage comes before the final stage for production and development. This stage organized rarely changing pre-application routines into one section which came before copying the source code. This organization would prevent unnecessary layer re-builds making builds faster. Finally, there was a separate final stage for production and another for development to keep unnecessary dev-tooling outside of the production image. 
 
 ### 3. Security & Layer Optimization
 
@@ -46,8 +46,7 @@ Kubernetes Secret objects are used to keep sensitive configuration separate from
 
 ### CI/CD Pipeline
 
-- Pipeline stages:
-- Secret management:
+- 
 
 ## What I Would Improve With More Time
 1. I would plan out my naming strategy in advance. An inconsistent switch between prod and production could become an issue in a bigger project. 
