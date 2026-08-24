@@ -62,15 +62,17 @@ This outlines the high-level step in the Github Actions pipelien that is trigger
 <- INSERT DIAGRAM ->
 
 ## What I Would Improve With More Time
-A project is never truly done as more standards and tools are released everyday and a new idea will always pop into your head. So, I had to decide WHERE I should stop. Kubernetes is extremeply complex and as I had several other competing projects: creating the docker compose file, setting up testing and linting, completing the Node.js services, setting up the database... e.t.c I leaned against looking into more complex configurations. If I had more time I would spend more time on this: 
+This project created a solid DevOps foundation for the web application. As the application became more complex and moved towards production these are the initiatives I would suggest investing in:  
 
-1. I would use a Redis primary/replica configuration to improve availability rather than relying on a single database instance. Due to the technical complexity of setting this up a single database instance was used for now since it was an adequate solution and resources should be dedicated to more unfinished services of the app.
+1. I would use a Redis primary/replica configuration to improve availability rather than relying on a single database instance. Due to the technical complexity of setting this up a single database instance was used for now since it was an adequate solution for this stage of development.
 
-2. I would restrict access to the plaintext ACL file in the Kubenretes deployment using Linux security mechanisms to secure the database usernames and passwords. I would also use Kubernetes NetworkPolicies to limit traffic to only the ports required by the application. These were finishing touches that would have been done if I had more time. However, a project is never truly done so I had to decide where I should stop. 
+2. I would spend mre time on security. For example, restricting access to the plaintext ACL file in the Kubenretes deployment using Linux security mechanisms to secure the database usernames and passwords. I would also use Kubernetes NetworkPolicies to limit traffic to only the ports required by the application. 
 
-3. I would use Kubernetes Horizontal Pod Autoscaling (HPA), driven by resource utilization metrics such as CPU and memory, to automatically scale application pods based on demand. This was not implemented in order to meet the project deadline.  
+3. I would use Kubernetes Horizontal Pod Autoscaling (HPA), driven by resource utilization metrics such as CPU and memory, to automatically scale application pods based on demand so the applicaiton can successfully manage varying workloads. 
 
-Finally, one last non-kubernetes related regret would have been the inconsistent naming convention when using prod vs produciton and dev vs development. I managed to maintain consistency in all other overarching variable names except for these ones. It's hard to keep track of it all when you come back to a project intermittantly. In the future, I'll create a naming convention doc to keep track of this. 
+4. I would establish a naming convention document for the DevOps team before the configuration becomes more complex to ensure consistency, improve clarity, and make onboarding new team members easier.
+
+
 
 
 
