@@ -1,58 +1,77 @@
 #  Project overview 
 
-Based on the vipmed-projects online devops challenge for new hires. As a DevOps candidate charged with demonstrating my understanding of docker, k8s, and pipelines.  
+Inspired by the **[vipmed-devops-challenge](https://github.com/vipmed-technology/devops-challenge)**, this project was designed to make life easier for developers working on a busineess-to-consumer web application by applying practical DevOps practices.
+
+* **Automated project setup:** Uses **Docker Compose** to provide a consistent development environment with minimal configuration.
+
+* **CI/CD & code integrity:** Uses **GitHub Actions** to automate linting, testing, and packaging on repository pushes, with Docker images published to **Docker Hub**.
+
+* **Production Kubernetes deployment:** Provides automated container orchestration, scalability, and improved application resilience.
+
+Key DevOps technologies: Docker, GitHub Actions, Kubernetes, Kustomize, Node.js, Infrastructure-as-Code
+
 
 # Architecture Documentation
 
-## System Architecture
+## Web App Architecture Diagram
+Diagram of the business-to-consumer web application which displays the app's services and the flow of HTTP requests when a user interacts with the application at the current stage of development. Note that at this time the app only has an api gateway, a user microservice and a database. The DevOps initiatives focus on these 3 components. 
 
-Draw or describe the architecture of your deployment
-- Insert diagrams & project overview
-- Improvement section. 
-- Final edits. goal => concise and high-level. 
+< INSERT DIAGRAM >
+
+## Kubernetes Architecture Diagram 
+Diagram of the Kubernetes infrastructure which displays the utilized resources and the relationships between them. 
+
+< INSERT DIAGRAM >
 
 ## Your Decisions
 
 ### Docker Strategy 
 ### 1. Base Image Choice 
 
- Used official, version-pinned Docker Node.js for development and Google Distroless images for production to ensure a consistent and secure run-time environment. The Distroless image provided a minimal runtime that reduced image size, and attack surface and resulted in final image size of **~220 MB**.  The Node.js images provided extra-tooling which could be used in debugging. 
+ Created 3 images, one for each of the 3 services: the api gateway service, the user microservice, and the database. Used official, version-pinned images to ensure that each had a consistent and secure run-time environment. The Google Node.js Distroless image was used for production for all Node.js-based services because it provided a minimal runtime and significantly reduced the image size down to around **~220 MB** in comarpison to the **~1.7GB** development images.  The Docker Node.js and Redis Docker were ideal for development because they provided extra-tooling which could be used in debugging. Finally, due to how rarely the database would need to be rebuilt, the Docker Redis image was used for the database's production image. 
  
  ### 2. Multi-Stage Build Strategy
- A separate dependency stage comes before the final stage for production and development. This stage organized rarely changing pre-application routines into one section which came before copying the source code. This organization would prevent unnecessary layer re-builds making builds faster. Finally, there was a separate final stage for production and another for development to keep unnecessary dev-tooling outside of the production image. 
+ There are different stages to go through when building an image for production and for development to keep unnecessary dev-tooling outside of the production image. The build-strategy looks like so for production and development images: There are 2 stages.  A final stage where source code is copied over and the entrypoint command is issued. And a dependency stage organizing rarely changing pre-application routines into one section which came before the final stage. Organizing the file in this way prevents unnecesary rebuilds while organizing related commands. 
 
 ### 3. Security & Layer Optimization
 
-Applied least-privilege principles by running the production container as a **non-root user** and assigning appropriate file ownership. Optimized Docker layers by placing infrequently changing dependencies before source-code changes and combining related `RUN` commands to minimize unnecessary layers and rebuilds.
+Inspired by the least-privilege principle the production container are started by a **non-root user** that's also assigned appropriate file ownership. Layer optimizations is accomplished by placing infrequently changing dependencies before source-code changes and combining related commands like `RUN` and `ENV` to eliminate unnecessary layers.
 
 ### 4. Reliability & Maintainability
 
-Implemented graceful shutdown handling for `SIGTERM` and `SIGINT` in the API Gateway and User Service, using Docker's exec-form `CMD` and the `node` command so Node.js runs as PID 1 and receives signals directly. Added Dockerfile comments for maintainability and documented the reasoning behind key architectural decisions to make future modifications easier for the development team.
+Graceful shutdown handling for `SIGTERM` and `SIGINT` in the API Gateway and User Service, was done using Docker's exec-form `CMD` and the `node` command which allows Node.js to run as PID 1 and receive signals directly. Dockerfile comments were added for maintainability and documented the reasoning behind key architectural decisions to make future modifications easier for the development team.
 
 
 ### Kubernetes Design
 
 ## 1. Environment Separation and Resource Allocation
 
-Namespaces are used to logically partition development and production resources. Resource limits and requests were based on official Kubernetes examples, Redis documentation, and reliable technical articles for the Node.js services. Production receives roughly twice the resources of development to account for the signifant difference in throughput the client-facing application would receive. 
+Namespaces are used to logically partition development and production resources. Resource limits and requests were based on official Kubernetes examples, Redis documentation, and reliable technical articles. Production receives roughly twice the resources of development to account for the signifant difference in throughput the client-facing application would receive. 
 
 ## 2. Health Checks and Scaling
 
-A liveness prove was used to detect applications that have become stuck or unresponsive, while the readiness probe was used to check whether the application and its dependencies are ready to handle requests. `initialDelaySeconds` gives the application enough time to start before health checks begin, helping prevent unnecessary restarts and pod flapping. Rolling updates were included to allow Kubernetes to create and verify a healthy replacement pod before terminating an existing pod.
+A liveness probe was used to detect applications that have become stuck or unresponsive, while the readiness probe was used to check whether the application and its dependencies are ready to handle requests. `initialDelaySeconds` gives the application enough time to start before health checks begin, helping prevent unnecessary restarts and pod flapping. Rolling updates were included to allow Kubernetes to create and verify a healthy replacement pod before terminating an existing pod.
 
 ## 3. Security 
 
-Kubernetes Secret objects are used to keep sensitive configuration separate from the application manifests, but since secrets are only hashed they wouldn't be suitable for real-life production. In a managed Kubernetes environment such as AWS, the platform's well-established secret-management service could be integrated with Kubernetes instead. 
+Kubernetes Secret objects are used to keep sensitive configuration separate from the application manifests, but since secrets are only hashed they wouldn't be suitable for use in production. Once the development team has a more stable application this Kubenetes deployment would be deployed in a cloud platform and their well-established secret-management service could replace the Secret objects.
 
 ### CI/CD Pipeline
+This outlines the high-level step in the Github Actions pipelien that is triggered when a developer pushes to any branch in the github repository.
 
-- 
+<- INSERT DIAGRAM ->
 
 ## What I Would Improve With More Time
-1. I would plan out my naming strategy in advance. An inconsistent switch between prod and production could become an issue in a bigger project. 
-2. use redis primary/replica configuration instead of having only 1 database... in the future 
-3. Least acess security rules for the aclfile have a network policy object to restrict traffic to the ports we need to run our applicaiton 
-4. in the future I would use Horizontal Pod Scaler along with grafana or prometheus metrics to scale up or down container based on metrics that reflect overuse of a container...*please change to k8s native way of doing this if it isn;t a thing.*
-5. I would use measured metrics instead of guessed metrics for readiness and liveliness probe... 
+A project is never truly done as more standards and tools are released everyday and a new idea will always pop into your head. So, I had to decide WHERE I should stop. Kubernetes is extremeply complex and as I had several other competing projects: creating the docker compose file, setting up testing and linting, completing the Node.js services, setting up the database... e.t.c I leaned against looking into more complex configurations. If I had more time I would spend more time on this: 
+
+1. I would use a Redis primary/replica configuration to improve availability rather than relying on a single database instance. Due to the technical complexity of setting this up a single database instance was used for now since it was an adequate solution and resources should be dedicated to more unfinished services of the app.
+
+2. I would restrict access to the plaintext ACL file in the Kubenretes deployment using Linux security mechanisms to secure the database usernames and passwords. I would also use Kubernetes NetworkPolicies to limit traffic to only the ports required by the application. These were finishing touches that would have been done if I had more time. However, a project is never truly done so I had to decide where I should stop. 
+
+3. I would use Kubernetes Horizontal Pod Autoscaling (HPA), driven by resource utilization metrics such as CPU and memory, to automatically scale application pods based on demand. This was not implemented in order to meet the project deadline.  
+
+Finally, one last non-kubernetes related regret would have been the inconsistent naming convention when using prod vs produciton and dev vs development. I managed to maintain consistency in all other overarching variable names except for these ones. It's hard to keep track of it all when you come back to a project intermittantly. In the future, I'll create a naming convention doc to keep track of this. 
+
+
 
 
