@@ -16,12 +16,12 @@ Key technologies: Docker, GitHub Actions, Kubernetes, Kustomize, Node.js
 ## Web App Architecture Diagram
 This diagram shows the flow of HTTP requests when a user interacts with the application. At this stage of development, the app only has an API gateway, a user microservice and a database. The DevOps initiatives focus on these 3 services. 
 
-![Diagram that displays the microservice architecture of the web application. In the diagram, a user sends a request to the API gateway. The API gateway sends it to the user microservice. The user microservice sends a request to the database.](/images/web-app-diagram.png)
+![Diagram that displays the microservice architecture of the web application. In the diagram, a user sends a request to the API gateway. The API gateway sends it to the user microservice. The user microservice sends a request to the database.](/images/web-app-diagram.svg)
 
 ## Kubernetes Architecture Diagram 
 This diagram shows the utilized Kubernetes resources and the relationships between them. 
 
-![ A box called API Gateway Deployment contains the Node JS logo and points to: ConfigMap (./api-gateway.env) and LoadBalancer (Port 3002).  A box called User Service Deployment contains the Node JS logo and points to: ConfigMap (./user-service.env), Secret (./secrets.env) and LoadBalancer (Port 3001). A box called Database Stateful Set contains the Redis logo and points to: Secret (./users.acl) and LoadBalancer (Port 6379)   ](/images/kubernetes-diagram.png)
+![ A box called API Gateway Deployment contains the Node JS logo and points to: ConfigMap (./api-gateway.env) and LoadBalancer (Port 3002).  A box called User Service Deployment contains the Node JS logo and points to: ConfigMap (./user-service.env), Secret (./secrets.env) and LoadBalancer (Port 3001). A box called Database Stateful Set contains the Redis logo and points to: Secret (./users.acl) and LoadBalancer (Port 6379)   ](/images/kubernetes-diagram.svg)
 
 ## Your Decisions
 
@@ -59,7 +59,7 @@ Kubernetes Secret objects are used to keep sensitive configuration separate from
 ### CI/CD Pipeline
 This diagram outlines the high-level steps in the GitHub Actions pipeline that is triggered when a developer pushes to any branch in the GitHub repository.
 
-![ A developer pushes to GitHub. This triggers a Git Actions Pipeline. The pipeline executes this sequence of steps: Build images, lint and test images, build production or development images based on the pushed branch and tag, tag the images, and push the images to the Docker Hub registry. This same description is shown using boxes and arrows in the diagram. ](/images/git-actions-pipeline.png)
+![ A developer pushes to GitHub. This triggers a Git Actions Pipeline. The pipeline executes this sequence of steps: Build images, lint and test images, build production or development images based on the pushed branch and tag, tag the images, and push the images to the Docker Hub registry. This same description is shown using boxes and arrows in the diagram. ](/images/git-actions-pipeline.svg)
 
 ## Future Initiatives
 This project created a solid DevOps foundation for the web application. As the application became more complex and moved towards production, these are the initiatives I would suggest investing in:  
